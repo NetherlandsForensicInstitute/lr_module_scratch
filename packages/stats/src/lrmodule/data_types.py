@@ -1,3 +1,4 @@
+from collections import namedtuple
 from enum import Enum
 from typing import NamedTuple
 
@@ -16,3 +17,7 @@ class ScoreType(Enum):
 class ModelSettings(NamedTuple):
     mark_type: MarkType
     score_type: ScoreType
+
+
+# Group the LLR percentile and best-estimate data in a tuple
+LLR_data = namedtuple("LLR_data", ["low_percentile", "best_estimate", "high_percentile"])
