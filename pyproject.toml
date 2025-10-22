@@ -1,0 +1,89 @@
+[project]
+name = "scratch"
+version = "0.0.1"
+description = "Scratch"
+authors = [
+    { name = "Netherlands Forensic Institute - CFS R&D Data", email = "cfs_rd_data@nfi.nl" },
+]
+dependencies = [
+    "lir>=1.0.0"
+]
+requires-python = "==3.13.*"
+readme = "README.md"
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Environment :: Console',
+    'Operating System :: MacOS :: MacOS X',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: POSIX',
+    'Programming Language :: Python :: 3.13',
+    'License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)'
+]
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[dependency-groups]
+dev = [
+    "pytest~=8.4.2",
+    "ruff~=0.14.1",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+# exclude = []
+
+[tool.ruff.format]
+quote-style = "preserve"
+skip-magic-trailing-comma = true
+
+[tool.ruff.lint]
+select = [
+    "I", # isort
+    "NPY", # numpy specific rules
+    "UP", # pyupgrade
+    "D", # pydocstyle
+    "N", # pep8-naming
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    "PL", # pylint
+    "S", # flake8-bandit
+    "PT", # flake8-pytest-style
+]
+ignore = [
+    'D100', # no module docstring required at top of each file
+    'D101', # no class docstring required (only in __init__)
+    'D205', # no blank line between summary and description of docstring required (we omit the summary often)
+    'D104', # no docstring in __init__.py of public package required
+    'D105', # no docstring in magic methods (like __eq__) required, since they are not class dependent
+    'D212', # no specific distinction between summary and description of a docstring (we omit the summary often)
+    'PLR0913', # no restriction on having 5 or fewer arguments in a function
+    'PLE0604', # no restriction on having only strings in __all__ definitions
+    'PLR2004', # no restriction on using magic values (unspecified) as used a lot in the tests
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"  # docstring type to use
+ignore-decorators = ["property"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = [
+    "S101", # Exclude the 'use of assert' warning in the test files
+    "D103", # No docstring necessary for tests
+    "PT011", # No `match` parameter necessary for pytest.raises
+]
+
+[tool.ruff.lint.flake8-pytest-style]
+parametrize-names-type = "csv"  # allows the string style of pytest.mark.parametrize feature names
+
+[tool.ruff.lint.isort]
+split-on-trailing-comma = false
+
+[tool.pdm]
+distribution = false
+
+[tool.pytest.ini_options]
+python_files = "tests/*.py"
