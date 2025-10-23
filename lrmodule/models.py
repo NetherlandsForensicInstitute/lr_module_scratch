@@ -3,14 +3,14 @@ from typing import NamedTuple
 
 
 class MarkType(Enum):
-    FIRING_PIN_IMPRESSION = 1
-    BREECH_PIN_IMPRESSION = 2
-    APERTURE_SHEER = 3
+    FIRING_PIN_IMPRESSION = "firing_pin_impression"
+    BREECH_PIN_IMPRESSION = "breech_pin_impression"
+    APERTURE_SHEER = "aperture_sheer"
 
 
 class ScoreType(Enum):
-    CMC = 1
-    ACCF = 2
+    CMC = "cmc"
+    ACCF = "accf"
 
 
 class ModelSettings(NamedTuple):
