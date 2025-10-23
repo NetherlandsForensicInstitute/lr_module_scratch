@@ -1,19 +1,23 @@
-from hashlib import blake2b
+from hashlib import sha1
 from pathlib import Path
 from typing import Optional
 
-from lir.lrsystems.specific_source import SpecificSourceSystem
+from lrmodule.lrsystem import ScratchLrSystem
+from lrmodule.models import ModelSettings
 
 
-def _get_model_dirname(settings: dict[str, str]) -> str:
-    return blake2b(str(sorted(settings.items())).encode("utf8")).hexdigest()
+def _get_model_dirname(settings: ModelSettings, dataset_id: str) -> str:
+    h = sha1()
+    h.update(str(settings).encode("utf8"))
+    h.update(dataset_id.encode("utf8"))
+    return h.hexdigest()
 
 
-def load_model(cache_dir: Path, settings: dict[str, str]) -> Optional[SpecificSourceSystem]:
-    model_path = cache_dir / _get_model_dirname(settings) / "model.pkl"
+def load_model(settings: ModelSettings, dataset_id: str, cache_dir: Path) -> Optional[ScratchLrSystem]:
+    model_path = cache_dir / _get_model_dirname(settings, dataset_id) / "model.pkl"
     raise NotImplementedError
 
 
-def save_model(cache_dir: Path, settings: dict[str, str], model: SpecificSourceSystem) -> None:
-    model_dir = cache_dir / _get_model_dirname(settings)
+def save_model(model: ScratchLrSystem, cache_dir: Path) -> None:
+    model_dir = cache_dir / _get_model_dirname(model.settings, model.dataset_id)
     raise NotImplementedError

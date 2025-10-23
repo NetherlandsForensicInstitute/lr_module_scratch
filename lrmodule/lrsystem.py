@@ -1,6 +1,16 @@
-from lir.data.models import DataStrategy
+from lir.data.models import DataSet
+from lir.lrsystems.lrsystems import Pipeline
 from lir.lrsystems.specific_source import SpecificSourceSystem
 
+from lrmodule.models import ModelSettings
 
-def train_model(settings: dict[str, str], data: DataStrategy) -> SpecificSourceSystem:
+
+class ScratchLrSystem(SpecificSourceSystem):
+    def __init__(self, settings: ModelSettings):
+        super().__init__(name="scratch", pipeline=Pipeline([]))
+        self.settings = settings
+        self.dataset_id = None
+
+
+def train_model(settings: ModelSettings, data: DataSet) -> ScratchLrSystem:
     raise NotImplementedError
