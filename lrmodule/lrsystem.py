@@ -2,7 +2,7 @@ from lir.data.models import DataSet
 from lir.lrsystems.lrsystems import Pipeline
 from lir.lrsystems.specific_source import SpecificSourceSystem
 
-from lrmodule.models import ModelSettings
+from lrmodule.data_types import ModelSettings
 
 
 class ScratchLrSystem(SpecificSourceSystem):
