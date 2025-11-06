@@ -14,10 +14,12 @@ def _get_model_dirname(settings: ModelSettings, dataset_id: str) -> str:
 
 
 def load_model(settings: ModelSettings, dataset_id: str, cache_dir: Path) -> Optional[ScratchLrSystem]:
+    """load previously cached model"""
     model_path = cache_dir / _get_model_dirname(settings, dataset_id) / "model.pkl"
     raise NotImplementedError
 
 
 def save_model(model: ScratchLrSystem, cache_dir: Path) -> None:
+    """save a model to disk"""
     model_dir = cache_dir / _get_model_dirname(model.settings, model.dataset_id)
     raise NotImplementedError
