@@ -1,25 +1,24 @@
-from hashlib import sha1
-from pathlib import Path
-from typing import Optional
+# from hashlib import sha256
+#
+# from lrmodule.data_types import ModelSettings
 
-from lrmodule.data_types import ModelSettings
-from lrmodule.lrsystem import ScratchLrSystem
-
-
-def _get_model_dirname(settings: ModelSettings, dataset_id: str) -> str:
-    h = sha1()
-    h.update(str(settings).encode("utf8"))
-    h.update(dataset_id.encode("utf8"))
-    return h.hexdigest()
+# from lir.lrsystems.binary_lrsystem import BinaryLRSystem
 
 
-def load_model(settings: ModelSettings, dataset_id: str, cache_dir: Path) -> Optional[ScratchLrSystem]:
-    """load previously cached model"""
-    model_path = cache_dir / _get_model_dirname(settings, dataset_id) / "model.pkl"
-    raise NotImplementedError
+# def _get_model_dirname(settings: ModelSettings, dataset_id: str) -> str:
+#     h = sha256()
+#     h.update(str(settings).encode("utf8"))
+#     h.update(dataset_id.encode("utf8"))
+#     return h.hexdigest()
 
 
-def save_model(model: ScratchLrSystem, cache_dir: Path) -> None:
-    """save a model to disk"""
-    model_dir = cache_dir / _get_model_dirname(model.settings, model.dataset_id)
-    raise NotImplementedError
+# def load_model(settings: ModelSettings, dataset_id: str, cache_dir: Path) -> BinaryLRSystem | None:
+#     """Load previously cached model."""
+#     cache_dir / _get_model_dirname(settings, dataset_id) / "model.pkl"
+#     raise NotImplementedError
+#
+#
+# def save_model(model: BinaryLRSystem, cache_dir: Path) -> None:
+#     """Save a model to disk."""
+#     cache_dir / _get_model_dirname(model.settings, model.dataset_id)
+#     raise NotImplementedError

@@ -5,5 +5,5 @@ from lrmodule.data_types import ModelSettings
 
 
 def train_model(settings: ModelSettings, training_data: FeatureData) -> LRSystem:
-    """train a model from data"""
+    """Train a model from data."""
     raise NotImplementedError
