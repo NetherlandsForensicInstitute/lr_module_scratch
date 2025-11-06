@@ -2,8 +2,8 @@ from hashlib import sha1
 from pathlib import Path
 from typing import Optional
 
+from lrmodule.data_types import ModelSettings
 from lrmodule.lrsystem import ScratchLrSystem
-from lrmodule.models import ModelSettings
 
 
 def _get_model_dirname(settings: ModelSettings, dataset_id: str) -> str:

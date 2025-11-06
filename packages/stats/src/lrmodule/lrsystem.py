@@ -1,11 +1,11 @@
 from lir.data.models import DataSet
-from lir.lrsystems.lrsystems import Pipeline
-from lir.lrsystems.specific_source import SpecificSourceSystem
+from lir.lrsystems.binary_lrsystem import BinaryLRSystem
+from lir.transform.pipeline import Pipeline
 
 from lrmodule.data_types import ModelSettings
 
 
-class ScratchLrSystem(SpecificSourceSystem):
+class ScratchLrSystem(BinaryLRSystem):
     def __init__(self, settings: ModelSettings):
         super().__init__(name="scratch", pipeline=Pipeline([]))
         self.settings = settings

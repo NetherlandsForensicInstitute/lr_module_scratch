@@ -5,8 +5,8 @@ from lir.data.models import DataSet
 
 from lrmodule import persistence
 from lrmodule.data import get_dataset_id
+from lrmodule.data_types import ModelSettings
 from lrmodule.lrsystem import train_model, ScratchLrSystem
-from lrmodule.models import ModelSettings
 
 
 def get_model(settings: ModelSettings, dataset: DataSet, cache_dir: Path) -> ScratchLrSystem:
