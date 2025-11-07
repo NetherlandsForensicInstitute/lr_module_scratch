@@ -1,6 +1,6 @@
 from lir.data.datasets.synthesized_normal_binary import SynthesizedNormalBinaryData, SynthesizedNormalDataClass
 from lrmodule.data_types import MarkType, ModelSettings, ScoreType
-from src.lrmodule.lrsystem import load_lrsystem
+from lrmodule.lrsystem import load_lrsystem
 
 
 def test_load_lrsystem():

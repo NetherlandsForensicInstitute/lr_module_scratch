@@ -9,4 +9,3 @@ modules:
         method: kde
         bandwidth: silverman
       elub: elub_bounder
-

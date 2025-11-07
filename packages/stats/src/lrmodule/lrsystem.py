@@ -35,7 +35,7 @@ def load_lrsystem(settings: ModelSettings) -> LRSystem:
     :return: an LRSystem object
     """
     filename = f"lrsystem_{settings.mark_type.value}_{settings.score_type.value}.yaml"
-    path = importlib.resources.files(resources_package) / filename
+    path = importlib.resources.files(resources_package) / filename  # ty: ignore[unresolved-attribute]
     if not path.exists():
         raise FileNotFoundError(path)
     cfg = confidence.loadf(path)
