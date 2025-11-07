@@ -1,0 +1,12 @@
+architecture: specific_source
+modules:
+  bootstrap:
+    method: lrmodule.lrsystem.bootstrap
+    n_bootstraps: 400
+    seed: 0
+    steps:
+      kde:
+        method: kde
+        bandwidth: silverman
+      elub: elub_bounder
+

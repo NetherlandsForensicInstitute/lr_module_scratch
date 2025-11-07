@@ -1,34 +1,26 @@
-# from pathlib import Path
-#
-# import numpy as np
+import numpy as np
+from lir.data.models import FeatureData, LLRData
+from lir.lrsystems.lrsystems import LRSystem
 
-# from lir.data.models import DataSet
-# from lrmodule import persistence
-
-# from lrmodule.data import get_dataset_id
-# from lrmodule.data_types import ModelSettings
-
-# from lir.lrsystems.binary_lrsystem import BinaryLRSystem
-# from lrmodule.lrsystem import train_model
+from lrmodule import persistence
+from lrmodule.data import get_dataset_id
+from lrmodule.data_types import ModelSettings
+from lrmodule.lrsystem import get_trained_model
 
 
-# def get_model(settings: ModelSettings, dataset: DataSet, cache_dir: Path) -> BinaryLRSystem:
-#     """TODO: at proper docstring.
-#
-#     Not here to review your code, function signatures in __init__.py module is a code smell
-#     """
-#     model = persistence.load_model(settings, get_dataset_id(dataset), cache_dir)
-#     if not model:
-#         model = train_model(settings, dataset)
-#         persistence.save_model(model, cache_dir)
-#     return model
-#
-#
-# def calculate_llrs(features: np.ndarray, settings: ModelSettings, dataset: DataSet, cache_dir: Path) -> np.ndarray:
-#     """TODO: at proper docstring.
-#
-#     Not here to review your code, function signatures in __init__.py module is a code smell
-#     """
-#     model = get_model(settings, dataset, cache_dir)
-#     llrs, labels, meta = model.apply(features, labels=None, meta=np.array((features.shape[0], 1)))
-#     return llrs
+def get_model(settings: ModelSettings, dataset: FeatureData, cache_dir: Path) -> LRSystem:
+    """TODO: docstr."""
+    dataset_id = get_dataset_id(dataset)
+    model = persistence.load_model(settings, dataset_id, cache_dir)
+    if not model:
+        model = get_trained_model(settings, dataset)
+        persistence.save_model(model, settings, dataset_id, cache_dir)
+    return model
+
+
+def calculate_llrs(
+    features: np.ndarray, settings: ModelSettings, training_data: FeatureData, cache_dir: Path
+) -> LLRData:
+    """TODO: docstr."""
+    model = get_model(settings, training_data, cache_dir)
+    return model.apply(FeatureData(features=features))
