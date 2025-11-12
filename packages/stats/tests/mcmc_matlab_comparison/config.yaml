@@ -1,0 +1,21 @@
+dataset:
+  firearm: 'glock'
+  ammo: 'fiocchi'
+  score: 'cmc'
+
+distribution_h1: 'betabinomial'
+parameters_h1:
+  alpha:
+    prior: 'uniform'
+    lower: 0.01
+    upper: 100
+  beta:
+    prior: 'uniform'
+    lower: 0.01
+    upper: 100
+distribution_h2: 'binomial'
+parameters_h2:
+  p:
+    prior: 'beta'
+    alpha: 0.5
+    beta: 0.5

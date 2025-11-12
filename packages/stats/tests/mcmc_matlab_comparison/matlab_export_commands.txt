@@ -1,0 +1,20 @@
+* directly from Bitbucket\LR_module\test_files\
+	- input scores:
+	firing_pin_impression-cmc-all-input.csv
+	breech_face_impression-cmc-all-input.csv
+* RunAllTestCases.m  (examples for firing_pin)
+	- 'firing_pin_impression', 'cmc';
+* DetermineLikelihoodRatioAndIntervals.m, break at line 116
+	- make sure the order of the scores matches with input: score_grid = eval_scores;
+* AnalyseBayesian.m, break at line 160
+	- parameters samples:
+	writematrix(samples.KM, 'firing_pin_impression-cmc-km_parameter_samples.csv')
+	writematrix(samples.KNM, 'firing_pin_impression-cmc-knm_parameter_samples.csv')
+	- parameter statistics:
+	writematrix([mean(samples.KM)',std(samples.KM)'], 'firing_pin_impression-cmc-km_parameter_stats.csv')
+	writematrix([mean(samples.KNM)',std(samples.KNM)'], 'firing_pin_impression-cmc-knm_parameter_stats.csv')
+	- log-10 probabilities:
+	writematrix(prctile(log10(probs.KM)', [5, 50, 95]), 'firing_pin_impression-cmc-km_logp.csv')
+	writematrix(prctile(log10(probs.KNM)', [5, 50, 95]), 'firing_pin_impression-cmc-knm_logp.csv')
+	- log-10 LRs:
+	writematrix(prctile(LLRs_all', [5, 50, 95]), 'firing_pin_impression-cmc-llr_unbound.csv')
