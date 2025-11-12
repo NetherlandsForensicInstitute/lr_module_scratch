@@ -15,11 +15,11 @@ def _get_model_dirname(settings: ModelSettings, dataset_id: str) -> str:
 
 def load_model(settings: ModelSettings, dataset_id: str, cache_dir: Path) -> LRSystem | None:
     """Load previously cached model."""
-    # model_path = cache_dir / _get_model_dirname(settings, dataset_id) / "model.pkl"
+    _ = cache_dir / _get_model_dirname(settings, dataset_id) / "model.pkl"
     raise NotImplementedError
 
 
 def save_model(model: LRSystem, settings: ModelSettings, dataset_id: str, cache_dir: Path) -> None:
     """Save a model to disk."""
-    # model_dir = cache_dir / _get_model_dirname(settings, dataset_id)
+    _ = cache_dir / _get_model_dirname(settings, dataset_id)
     raise NotImplementedError
