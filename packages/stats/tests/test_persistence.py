@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pytest
-
 from lrmodule import ModelSettings
 from lrmodule.data_types import MarkType, ScoreType
 from lrmodule.lrsystem import load_lrsystem
