@@ -1,53 +1,51 @@
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
 [project]
-name = "scratch"
-version = "0.0.1"
-description = "Scratch"
+name = "lr_module_scratch"
+description = "Package for providing the LR module for Scratch."
+dynamic = ["version"]
 authors = [
-  { name = "Netherlands Forensic Institute - CFS R&D Data", email = "cfs_rd_data@nfi.nl" },
-  { name = "Sharlon N. Regales", email = "s.regales@nfi.nl" },
-  { name = "Raymond Houwing", email = "r.houwing@nfi.nl" },
-]
+    {name = "Netherlands Forensics Institute", email = "netherlandsforensicinstitute@users.noreply.github.com"}, ]
+requires-python = ">=3.13, <3.14"  # `pytensor` (required by `pymc` doesn't support python 3.14 yet)
 readme = "README.md"
-classifiers = [
-  'Development Status :: 4 - Beta',
-  'Environment :: Console',
-  'Operating System :: MacOS :: MacOS X',
-  'Operating System :: Microsoft :: Windows',
-  'Operating System :: POSIX',
-  'Programming Language :: Python :: 3.13',
-  'License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)',
-]
+license = {text = "Apache Software License 2.0"}
+dependencies = ["lir==1.1.0", "pandas>=2.3.3", "arviz>=0.22.0", "pymc>=5.26.1"]
 
-requires-python = ">=3.13"
-dependencies = [
-    "fastapi[standard]>=0.119.0",
-    "loguru>=0.7.3",
-    "uvicorn>=0.38.0",
-]
-
-# https://docs.astral.sh/uv/concepts/projects/workspaces/
-[tool.uv.sources]
-scratch-core = { workspace = true }
-stats = { workspace = true }
-
-[tool.uv.workspace]
-members = ["packages/*"]
+[project.urls]
+homepage = "https://github.com/NetherlandsForensicInstitute/lr_module_scratch/"
 
 [dependency-groups]
 dev = [
-  "deptry>=0.23.1",
-  "diff-cover>=9.7.1",
-  "ipykernel>=7.0.0",
-  "pre-commit>=4.3.0",
-  "pyinstaller>=6.16.0",
-  "pytest>=8.4.2",
-  "pytest-cov>=7.0.0",
-  "requests>=2.32.5",
-  "ruff>=0.14.0",
-  "rust-just>=1.43.0",
-  "ty>=0.0.1a22",
+    "pytest>=9.0.1",
+    "ruff>=0.14.5",
+    "ty>=0.0.1a26",
+    "coverage>=7.11.3",
 ]
 
+[tool.pdm]
+version = {source = "scm"}
+
+[tool.pdm.scripts]
+all = {composite = ["check", "test"]}
+check = {composite = ["lint", "format-check", "check-static"]}
+all-fix = {composite = ["check-quality", "test"]}
+
+check-quality = {composite = ["lint-fix", "format-check", "format-fix"]}
+check-static = "pdm run ty check"
+
+lint = "ruff check lrmodule/"
+lint-fix = "ruff check --fix lrmodule/"
+
+format-check = "ruff format --diff lrmodule/"
+format-fix = "ruff format lrmodule/"
+
+# If no args are given to 'test', this will run as if '{args}' is an empty string.
+test = "coverage run --branch --source lir --module pytest --strict-markers tests/ {args}"
+
+
+# Following Scratch conventions on linting, type hinting, etc.
 [tool.ruff]
 line-length = 120
 target-version = "py313"
@@ -83,7 +81,7 @@ convention = "numpy"            # docstring type to use
 ignore-decorators = ["property"]
 
 [tool.ruff.lint.per-file-ignores]
-"**/tests/*.py" = [
+"tests/*.py" = [
   "S101",  # Exclude the 'use of assert' warning in the test files
   "D103",  # No docstring necessary for tests
   "PT011", # No `match` parameter necessary for pytest.raises
@@ -91,39 +89,3 @@ ignore-decorators = ["property"]
 
 [tool.ty.environment]
 python-version = "3.13"
-
-[tool.pytest.ini_options]
-pythonpath = ["src"]
-testpaths = ["tests", "packages/**/tests"]
-addopts = [
-  "--import-mode=importlib",
-  "--cov-config=pyproject.toml",
-  "--cov-report=term",
-]
-markers = [
-  "integration: Tests related to more than one unit (examples: modules, interfaces)",
-  "e2e: End to end test (full system test)",
-  "contract_testing: all tests used for checking if the interface to the outside is same as contract",
-]
-
-[tool.coverage.report]
-fail_under = 80
-skip_empty = true
-skip_covered = true
-show_missing = true
-omit = ["src/main.py"]
-
-[tool.coverage.run]
-branch = true
-source = [
-  "src",
-  "packages/stats/src",
-  "packages/scratch-core/src",
-]
-omit = ["src/main.py"]
-
-[tool.coverage.html]
-directory = "htmlcov"
-
-[tool.coverage.xml]
-output = "coverage.xml"
