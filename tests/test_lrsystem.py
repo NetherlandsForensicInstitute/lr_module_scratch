@@ -21,7 +21,3 @@ def test_run_lrsystem():
     llrs = lrsystem.fit(data).apply(data)
     assert llrs.features.shape == (200, 3)
 
-
-if __name__ == "__main__":
-    test_load_lrsystem()
-    test_run_lrsystem()
