@@ -1,14 +1,14 @@
+import pytest
 from lir.data.datasets.synthesized_normal_binary import SynthesizedNormalBinaryData, SynthesizedNormalDataClass
+from lir.data.models import FeatureData
+
 from lrmodule.data_types import MarkType, ModelSettings, ScoreType
 from lrmodule.lrsystem import load_lrsystem
 
 
-def test_load_lrsystem():
-    load_lrsystem(ModelSettings(MarkType.FIRING_PIN_IMPRESSION, ScoreType.ACCF))
-
-
-def test_run_lrsystem():
-    lrsystem = load_lrsystem(ModelSettings(MarkType.FIRING_PIN_IMPRESSION, ScoreType.ACCF))
+@pytest.fixture
+def sample_feature_data() -> FeatureData:
+    """Provide FeatureData collection of synthesized normal binary data."""
     data = SynthesizedNormalBinaryData(
         data_classes={
             0: SynthesizedNormalDataClass(mean=-1, std=1, size=100),
@@ -18,6 +18,16 @@ def test_run_lrsystem():
     )
     data = data.get_instances()
     data = data.replace(features=data.features.flatten())
-    llrs = lrsystem.fit(data).apply(data)
+
+    return data
+
+
+def test_load_lrsystem():
+    load_lrsystem(ModelSettings(MarkType.FIRING_PIN_IMPRESSION, ScoreType.ACCF))
+
+
+def test_run_lrsystem(sample_feature_data: FeatureData):
+    lrsystem = load_lrsystem(ModelSettings(MarkType.FIRING_PIN_IMPRESSION, ScoreType.ACCF))
+    llrs = lrsystem.fit(sample_feature_data).apply(sample_feature_data)
     assert llrs.features.shape == (200, 3)
 
