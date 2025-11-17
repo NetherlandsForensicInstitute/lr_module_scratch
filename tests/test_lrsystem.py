@@ -1,6 +1,7 @@
 import pytest
 from lir.data.datasets.synthesized_normal_binary import SynthesizedNormalBinaryData, SynthesizedNormalDataClass
 from lir.data.models import FeatureData
+from lir.lrsystems.lrsystems import LRSystem
 
 from lrmodule.data_types import MarkType, ModelSettings, ScoreType
 from lrmodule.lrsystem import load_lrsystem
@@ -26,8 +27,15 @@ def test_load_lrsystem():
     load_lrsystem(ModelSettings(MarkType.FIRING_PIN_IMPRESSION, ScoreType.ACCF))
 
 
-def test_run_lrsystem(sample_feature_data: FeatureData):
+@pytest.fixture
+def trained_lr_system(sample_feature_data: FeatureData) -> LRSystem:
+    """Provide a basic trained LR system model based on specific settings and data."""
     lrsystem = load_lrsystem(ModelSettings(MarkType.FIRING_PIN_IMPRESSION, ScoreType.ACCF))
-    llrs = lrsystem.fit(sample_feature_data).apply(sample_feature_data)
-    assert llrs.features.shape == (200, 3)
+    lrsystem.fit(sample_feature_data)
 
+    return lrsystem
+
+
+def test_run_lrsystem(trained_lr_system: LRSystem, sample_feature_data: FeatureData):
+    llrs = trained_lr_system.apply(sample_feature_data)
+    assert llrs.features.shape == (200, 3)
