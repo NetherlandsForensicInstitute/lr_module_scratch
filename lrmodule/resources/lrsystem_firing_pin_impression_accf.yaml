@@ -1,4 +1,4 @@
-architecture: specific_source
+architecture: lrmodule.binary_lrsystem
 modules:
   bootstrap:
     method: lrmodule.lrsystem.bootstrap

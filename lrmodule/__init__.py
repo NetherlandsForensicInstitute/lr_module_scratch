@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import numpy as np
+from lir.config.lrsystem_architectures import specific_source
 from lir.data.models import FeatureData, LLRData
 from lir.lrsystems.lrsystems import LRSystem
 
@@ -26,3 +27,8 @@ def calculate_llrs(
     """TODO: docstr."""
     model = get_model(settings, training_data, cache_dir)
     return model.apply(FeatureData(features=features))
+
+
+# create an alias for the specific source system, since the architecture is identical but the name is misleading
+# in the current application
+binary_lrsystem = specific_source
