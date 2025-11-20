@@ -34,15 +34,23 @@ class ScratchData(DataStrategy):
         df = pd.read_csv(self.file_path)
 
         # Ensure all expected columns are present
-        expected_columns = ["weapon1", "weapon2", "accf", "hypothesis", "split1"]
+        expected_columns = ["weapon1", "weapon2", "hypothesis", "split1"]
         if not all(column in df.columns for column in expected_columns):
-            raise ValueError(f"Missing one of the expected columns: {', '.join(expected_columns)}")
+            raise ValueError(
+                f"Missing one of the expected columns: {', '.join(set(expected_columns) - set(df.columns))}"
+            )
+
+        if "accf" in df.columns:
+            feature_columns = ["accf"]
+        elif "ccf" in df.columns:
+            feature_columns = ["ccf"]
+        else:
+            raise ValueError("Missing one of the expected feature columns: 'accf' or 'ccf'")
 
         # Find all columns regarding the prepared folds, named 'split*' ('split1', 'split2', etc.)
         fold_column_names = [c for c in df.columns if c.startswith("split")]
 
         label_column = ["hypothesis"]
-        feature_columns = ["accf"]
 
         # Group the folds by the column name, i.e. 'split1', 'split2', etc.
         df_with_subsets = df.melt(
@@ -65,8 +73,8 @@ class ScratchData(DataStrategy):
             for test_or_train_indicator, raw_data in test_train_folds.groupby("test_train_split"):
                 # The `test_or_train_indicator` refers to the role of this data
                 # in the current fold; belonging to either the 'test' or 'train' split.
-                features = raw_data[feature_columns].to_numpy()
-                labels = raw_data[label_column].to_numpy().flatten()
+                features = raw_data[feature_columns].to_numpy(dtype=float).flatten()
+                labels = raw_data[label_column].to_numpy(dtype=int).flatten()
 
                 subset_folds[test_or_train_indicator] = FeatureData(features=features, labels=labels)
 
