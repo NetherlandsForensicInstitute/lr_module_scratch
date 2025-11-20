@@ -1,0 +1,30 @@
+output: output/${timestamp}_validation
+
+aperture_shear_ccf_data:
+  strategy: lrmodule.input_data.ScratchData
+  input_file_path: data/aperture_shear-ccf.csv
+
+aperture_shear_ccf_lrsystem:
+  architecture: lrmodule.binary_lrsystem
+  modules:
+    bootstrap:
+      method: lrmodule.lrsystem.bootstrap
+      n_bootstraps: 400
+      seed: 0
+      steps:
+        kde:
+          method: kde
+          bandwidth: silverman
+        elub: elub_bounder
+
+experiments:
+  aperture_shear_model:
+    strategy: single_run
+    lr_system: ${aperture_shear_ccf_lrsystem}
+    data: ${aperture_shear_ccf_data}
+    metrics:
+      - cllr
+      - cllr_min
+    visualization:
+      - pav
+      - ece
