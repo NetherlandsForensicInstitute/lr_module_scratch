@@ -73,7 +73,7 @@ class ScratchData(DataStrategy):
             for test_or_train_indicator, raw_data in test_train_folds.groupby("test_train_split"):
                 # The `test_or_train_indicator` refers to the role of this data
                 # in the current fold; belonging to either the 'test' or 'train' split.
-                features = raw_data[feature_columns].to_numpy(dtype=float).flatten()
+                features = raw_data[feature_columns].to_numpy(dtype=float)
                 labels = raw_data[label_column].to_numpy(dtype=int).flatten()
 
                 subset_folds[test_or_train_indicator] = FeatureData(features=features, labels=labels)
