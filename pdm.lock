@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:5a775a6ecbb9213c373e54fede6de87fb0a4f1160ff2f06dacc649e1fa52e87f"
+content_hash = "sha256:7fa1a10da78e9318c6fe51108a192509374c4378e9af52578460a2b91d86117b"
 
 [[metadata.targets]]
 requires_python = ">=3.13,<3.14"
@@ -1060,6 +1060,21 @@ dependencies = [
 files = [
     {file = "pytest-8.4.2-py3-none-any.whl", hash = "sha256:872f880de3fc3a5bdc88a11b39c9710c3497a547cfa9320bc3c5e62fbf272e79"},
     {file = "pytest-8.4.2.tar.gz", hash = "sha256:86c0d0b93306b961d58d62a4db4879f27fe25513d4b969df351abdddb3c30e01"},
+]
+
+[[package]]
+name = "pytest-testmon"
+version = "2.1.4"
+requires_python = ">=3.8"
+summary = "selects tests affected by changed files and methods"
+groups = ["dev"]
+dependencies = [
+    "coverage<8,>=6",
+    "pytest<9,>=5",
+]
+files = [
+    {file = "pytest_testmon-2.1.4-py3-none-any.whl", hash = "sha256:3d1178b455a727c94dde85228a34b7ef857751ba142c15874df82d8876e31194"},
+    {file = "pytest_testmon-2.1.4.tar.gz", hash = "sha256:cc3dd31f9bf30f6ec11c5153da3c606df7545f3cd90bfb90ce6bd4c48e717aaf"},
 ]
 
 [[package]]

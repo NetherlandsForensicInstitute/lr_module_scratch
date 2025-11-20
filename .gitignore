@@ -1,6 +1,7 @@
 *~
 # Project specific
 lrsystem_output/
+.testmondata
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
