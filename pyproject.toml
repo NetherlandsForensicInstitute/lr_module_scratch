@@ -18,10 +18,11 @@ homepage = "https://github.com/NetherlandsForensicInstitute/lr_module_scratch/"
 
 [dependency-groups]
 dev = [
-    "pytest>=9.0.1",
+    "pytest==8.4.2",  # `pytest-testmon` currently only supports `pytest<9`
     "ruff>=0.14.5",
     "ty>=0.0.1a26",
     "coverage>=7.11.3",
+    "pytest-testmon>=2.1.4",
 ]
 
 [tool.pdm]
@@ -29,6 +30,7 @@ version = {source = "scm"}
 
 [tool.pdm.scripts]
 all = {composite = ["check", "test"]}
+all_with_quicktest = {composite = ["check", "quicktest"]}
 check = {composite = ["lint", "format-check", "check-static"]}
 all-fix = {composite = ["check-quality", "test"]}
 
@@ -43,6 +45,7 @@ format-fix = "ruff format lrmodule/"
 
 # If no args are given to 'test', this will run as if '{args}' is an empty string.
 test = "coverage run --branch --source lir --module pytest --strict-markers tests/ {args}"
+quicktest = {composite = ["test --testmon"]}
 
 
 # Following Scratch conventions on linting, type hinting, etc.
