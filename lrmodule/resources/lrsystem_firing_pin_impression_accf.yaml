@@ -1,11 +1,11 @@
 architecture: lrmodule.binary_lrsystem
 modules:
-  bootstrap:
-    method: lrmodule.lrsystem.bootstrap
-    n_bootstraps: 400
-    seed: 0
-    steps:
-      kde:
-        method: kde
-        bandwidth: silverman
-      elub: elub_bounder
+  method: bootstrap
+  n_bootstraps: 400
+  seed: 0
+  points: data
+  steps:
+    kde:
+      method: kde
+      bandwidth: silverman
+    elub: elub_bounder

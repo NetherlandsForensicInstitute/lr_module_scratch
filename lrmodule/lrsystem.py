@@ -2,29 +2,13 @@ import importlib
 from pathlib import Path
 
 import confidence
-from lir.config.base import ContextAwareDict, _expand, config_parser, pop_field
-from lir.config.lrsystem_architectures import parse_lrsystem, parse_pipeline
+from lir.config.base import _expand
+from lir.config.lrsystem_architectures import parse_lrsystem
 from lir.data.models import FeatureData
-from lir.lrsystems.bootstraps import BootstrapAtData
 from lir.lrsystems.lrsystems import LRSystem
 
 from lrmodule import resources as resources_package
 from lrmodule.data_types import ModelSettings
-
-
-@config_parser
-def bootstrap(modules_config: ContextAwareDict, output_dir: Path) -> BootstrapAtData:
-    """
-    Transitional function to parse a bootstrapping pipeline.
-
-    The configuration arguments are passed directly to `BootstrapAtData.__init__()`.
-
-    :param modules_config: the configuration
-    :param output_dir: where to write output, if any
-    :return: a bootstrapping object
-    """
-    pipeline = parse_pipeline(pop_field(modules_config, "steps"), output_dir)
-    return BootstrapAtData(pipeline.steps, **modules_config)
 
 
 def load_lrsystem(settings: ModelSettings) -> LRSystem:
