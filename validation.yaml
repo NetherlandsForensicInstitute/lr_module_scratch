@@ -1,5 +1,5 @@
 output: output/${timestamp}_validation
-data_root: /path/to/csv/data  # update this path
+data_root: data  # update this path
 
 aperture_shear_data:
   strategy: lrmodule.input_data.ScratchData
@@ -16,52 +16,117 @@ breech_face_impression_data:
 aperture_shear_ccf_lrsystem:
   architecture: lrmodule.binary_lrsystem
   modules:
-    method: bootstrap
-    n_bootstraps: 400
-    seed: 0
-    points: data
     steps:
-      kde:
-        method: kde
-        bandwidth:
-          - 0.05  # KNM kernel size
-          - 0.23  # KM kernel size
-      elub: elub_bounder
+      select:
+        methode: select_marktype
+        mark_type: ccf
+      transform:
+        method: transform_marktype
+        mark_type: ccf
+      bootstrap:
+        method: bootstrap
+        n_bootstraps: 8
+        seed: 0
+        points: data
+        steps:
+          kde:
+            method: kde
+            bandwidth:
+              - 0.05  # KNM kernel size
+              - 0.23  # KM kernel size
+          elub: elub_bounder
 
 firing_pin_impression_accf_lrsystem:
   architecture: lrmodule.binary_lrsystem
   modules:
-    method: bootstrap
-    n_bootstraps: 400
-    seed: 0
-    points: data
     steps:
-      kde:
-        method: kde
-        bandwidth:
-          - 0.021  # KNM kernel size
-          - 0.14  # KM kernel size
-      elub: elub_bounder
+      select:
+        methode: select_marktype
+        mark_type: ccf
+      transform:
+        method: transform_marktype
+        mark_type: ccf
+      bootstrap:
+        method: bootstrap
+        n_bootstraps: 8
+        seed: 0
+        points: data
+        steps:
+          kde:
+            method: kde
+            bandwidth:
+              - 0.021  # KNM kernel size
+              - 0.14  # KM kernel size
+          elub: elub_bounder
 
 breech_face_impression_accf_lrsystem:
   architecture: lrmodule.binary_lrsystem
   modules:
-    method: bootstrap
-    n_bootstraps: 400
-    seed: 0
-    points: data
     steps:
-      kde:
-        method: kde
-        bandwidth:
-          - 0.027  # KNM kernel size
-          - 0.11  # KM kernel size
-      elub: elub_bounder
+      select:
+        methode: select_marktype
+        mark_type: accf
+      transform:
+        method: transform_marktype
+        mark_type: accf
+      bootstrap:
+        method: bootstrap
+        n_bootstraps: 8
+        seed: 0
+        points: data
+        steps:
+          kde:
+            method: kde
+            bandwidth:
+              - 0.027  # KNM kernel size
+              - 0.11  # KM kernel size
+          elub: elub_bounder
+
+firing_pin_impression_cmc_lrsystem:
+  architecture: lrmodule.binary_lrsystem
+  modules:
+    steps:
+      select:
+        methode: select_marktype
+        mark_type: cmc
+      transform:
+        method: transform_marktype
+        mark_type: cmc
+      mcmc:
+        method: lrmodule.mcmc.McmcLLRModel
+        # parameters copied from MCMC test
+        distribution_h1: betabinomial
+        parameters_h1:
+            alpha:
+              prior: uniform
+              lower: 0.01
+              upper: 100
+            beta:
+              prior: uniform
+              lower: 0.01
+              upper: 100
+        distribution_h2: binomial
+        parameters_h2:
+          p:
+            prior: beta
+            alpha: 0.5
+            beta: 0.5
+        interval:
+          - 0.05
+          - 0.95
+      elub: elub_bounder  # does this work with the interval? (TODO: ticket)
+
 
 breech_face_impression_cmc_lrsystem:
   architecture: lrmodule.binary_lrsystem
   modules:
     steps:
+      select:
+        methode: select_marktype
+        mark_type: cmc
+      transform:
+        method: transform_marktype
+        mark_type: cmc
       mcmc:
         method: lrmodule.mcmc.McmcLLRModel
         # parameters copied from MCMC test
@@ -98,6 +163,9 @@ experiments:
       - pav
       - ece
       - llr_interval
+      - score_histogram (ongetransformeerd)
+      - score_histogram (normalized (area=1))
+      
   firing_pin_impression_model:
     strategy: single_run
     lr_system: ${firing_pin_impression_accf_lrsystem}
@@ -109,6 +177,7 @@ experiments:
       - pav
       - ece
       - llr_interval
+
   breech_face_impression_model_accf:
     strategy: single_run
     lr_system: ${breech_face_impression_accf_lrsystem}
@@ -120,14 +189,16 @@ experiments:
       - pav
       - ece
       - llr_interval
+
   breech_face_impression_model_cmc:
     strategy: single_run
     lr_system: ${breech_face_impression_cmc_lrsystem}
     data: ${breech_face_impression_data}
     metrics:
       - cllr
-      - cllr_min
+      - cllr_min  
     visualization:
       - pav
       - ece
       - llr_interval
+
