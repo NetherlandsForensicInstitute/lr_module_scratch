@@ -23,7 +23,7 @@ def test_fit_parameter_stats():
 
     # beta-binomial model
     scores_h1 = np.array(df_scores[df_scores[0] == "km"].iloc[:, 1:], dtype=np.int16)
-    model_h1 = McmcModel(cfg.distribution_h1, cfg.parameters_h1).fit(scores_h1)
+    model_h1 = McmcModel(cfg.distribution_h1, cfg.parameters_h1, random_seed=cfg.random_seed).fit(scores_h1)
     stats_calc = np.array([
         [np.mean(model_h1.parameter_samples["alpha"]), np.std(model_h1.parameter_samples["alpha"])],
         [np.mean(model_h1.parameter_samples["beta"]), np.std(model_h1.parameter_samples["beta"])],
@@ -33,7 +33,7 @@ def test_fit_parameter_stats():
 
     # binomial model
     scores_h2 = np.array(df_scores[df_scores[0] == "knm"].iloc[:, 1:], dtype=np.int16)
-    model_h2 = McmcModel(cfg.distribution_h2, cfg.parameters_h2).fit(scores_h2)
+    model_h2 = McmcModel(cfg.distribution_h2, cfg.parameters_h2, random_seed=cfg.random_seed).fit(scores_h2)
     stats_calc = np.array([np.mean(model_h2.parameter_samples["p"]), np.std(model_h2.parameter_samples["p"])])
     stats_ref = np.loadtxt(base_directory / (csv_prefix + "-knm_parameter_stats.csv"), delimiter=",")
     assert np.allclose(stats_calc, stats_ref, rtol=1e-4, atol=1e-4)
@@ -87,7 +87,9 @@ def test_llr_dataset(dataset_name: str):
     features = np.concatenate([scores_km, scores_knm])
     labels = np.concatenate([np.ones(scores_km.shape[0]), np.zeros(scores_knm.shape[0])])
 
-    model = McmcLLRModel(cfg.distribution_h1, cfg.parameters_h1, cfg.distribution_h2, cfg.parameters_h2)
+    model = McmcLLRModel(cfg.distribution_h1, cfg.parameters_h1,
+                         cfg.distribution_h2, cfg.parameters_h2,
+                         random_seed=cfg.random_seed)
     model.fit(FeatureData(features=features, labels=labels))
     llrs = model.transform(FeatureData(features=scores_eval))
     llrs_ref = np.loadtxt(base_directory / (csv_prefix + "-llr_unbound.csv"), delimiter=",")
