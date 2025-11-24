@@ -19,3 +19,5 @@ parameters_h2:
     prior: 'beta'
     alpha: 0.5
     beta: 0.5
+
+random_seed: 42
