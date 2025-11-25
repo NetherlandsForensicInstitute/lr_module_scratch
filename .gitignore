@@ -2,6 +2,7 @@
 # Project specific
 lrsystem_output/
 .testmondata
+tests/test_model_storage/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
