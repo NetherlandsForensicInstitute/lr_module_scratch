@@ -40,15 +40,11 @@ class ScratchData(DataStrategy):
                 f"Missing one of the expected columns: {', '.join(set(expected_columns) - set(df.columns))}"
             )
 
-        if "accf" in df.columns:
-            feature_columns = ["accf"]
-        elif "ccf" in df.columns:
-            feature_columns = ["ccf"]
-        else:
-            raise ValueError("Missing one of the expected feature columns: 'accf' or 'ccf'")
-
         # Find all columns regarding the prepared folds, named 'split*' ('split1', 'split2', etc.)
         fold_column_names = [c for c in df.columns if c.startswith("split")]
+
+        # Feature columns are all columns that are not the expected columns
+        feature_columns = [c for c in df.columns if c not in expected_columns and c not in fold_column_names]
 
         label_column = ["hypothesis"]
 
@@ -73,7 +69,7 @@ class ScratchData(DataStrategy):
             for test_or_train_indicator, raw_data in test_train_folds.groupby("test_train_split"):
                 # The `test_or_train_indicator` refers to the role of this data
                 # in the current fold; belonging to either the 'test' or 'train' split.
-                features = raw_data[feature_columns].to_numpy(dtype=float)
+                features = raw_data[feature_columns].to_numpy(dtype=float).reshape(-1, len(feature_columns))
                 labels = raw_data[label_column].to_numpy(dtype=int).flatten()
 
                 subset_folds[test_or_train_indicator] = FeatureData(features=features, labels=labels)
