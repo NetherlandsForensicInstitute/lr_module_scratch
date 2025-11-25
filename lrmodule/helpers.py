@@ -1,5 +1,4 @@
 import numpy as np
-from lir.data.models import FeatureData
 
 
 def select_marktype_ccf(p: np.ndarray) -> np.ndarray:

@@ -11,6 +11,4 @@ def test_validation_yaml():
     for name, experiment in setup.items():
         # TODO: once the experiments are working and data are accessible, this should not raise an exception
         # Alternatively, run this test with fake data
-        with pytest.raises(Exception):
-            experiment.run()
-
+        experiment.run()

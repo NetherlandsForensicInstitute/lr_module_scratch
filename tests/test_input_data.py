@@ -13,18 +13,21 @@ def test_input_data_to_instances():
 
     # The following train/test splits for the given data_subsets are expected
     subset_1 = {
-        "train": FeatureData(labels=array([1, 0]), features=array([[60.1234], [63.1234]])),
-        "test": FeatureData(labels=array([1, 0]), features=array([[20.1234], [10.1234]])),
+        "train": FeatureData(labels=array([1, 0]), features=array([[60.1234, 10, 21], [63.1234, 16, 20]])),
+        "test": FeatureData(labels=array([1, 0]), features=array([[20.1234, 11, 42], [10.1234, 6, 34]])),
     }
 
     subset_2 = {
-        "train": FeatureData(labels=array([1, 0]), features=array([[20.1234], [10.1234]])),
-        "test": FeatureData(labels=array([1, 0]), features=array([[60.1234], [63.1234]])),
+        "train": FeatureData(labels=array([1, 0]), features=array([[20.1234, 11, 42], [10.1234, 6, 34]])),
+        "test": FeatureData(labels=array([1, 0]), features=array([[60.1234, 10, 21], [63.1234, 16, 20]])),
     }
 
     subset_3 = {
-        "train": FeatureData(labels=array([1, 1, 0, 0]), features=array([[60.1234], [20.1234], [10.1234], [63.1234]])),
-        "test": FeatureData(labels=array([0]), features=array([[9.1234]])),
+        "train": FeatureData(
+            labels=array([1, 1, 0, 0]),
+            features=array([[60.1234, 10, 21], [20.1234, 11, 42], [10.1234, 6, 34], [63.1234, 16, 20]]),
+        ),
+        "test": FeatureData(labels=array([0]), features=array([[9.1234, 2, 12]])),
     }
 
     # Act
