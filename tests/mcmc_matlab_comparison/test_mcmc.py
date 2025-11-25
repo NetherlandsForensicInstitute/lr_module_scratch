@@ -88,7 +88,12 @@ def test_llr_dataset(dataset_name: str):
     labels = np.concatenate([np.ones(scores_km.shape[0]), np.zeros(scores_knm.shape[0])])
 
     model = McmcLLRModel(
-        cfg.distribution_h1, cfg.parameters_h1, cfg.distribution_h2, cfg.parameters_h2, random_seed=cfg.random_seed
+        cfg.distribution_h1,
+        cfg.parameters_h1,
+        cfg.distribution_h2,
+        cfg.parameters_h2,
+        bounder=None,
+        random_seed=cfg.random_seed,
     )
     model.fit(FeatureData(features=features, labels=labels))
     llrs = model.transform(FeatureData(features=scores_eval))
