@@ -42,6 +42,8 @@ class McmcLLRModel(Transformer):
         self.model_h1 = McmcModel(distribution_h1, parameters_h1, **mcmc_kwargs)
         self.model_h2 = McmcModel(distribution_h2, parameters_h2, **mcmc_kwargs)
         self.bounder = bounder
+        self.lower_llr_bounds = None
+        self.upper_llr_bounds = None
         self.interval = interval
 
     def fit(self, instances: FeatureData) -> Self:
@@ -49,11 +51,17 @@ class McmcLLRModel(Transformer):
         self.model_h1.fit(instances.features[instances.labels == 1])
         self.model_h2.fit(instances.features[instances.labels == 0])
         if self.bounder is not None:
-            # determine the bounds based on the LLRs of the training data
+            # determine the bounds based on the LLRs of the training data, each sample results into an LR-system
             logp_h1 = self.model_h1.transform(instances.features)
             logp_h2 = self.model_h2.transform(instances.features)
             llrs = logp_h1 - logp_h2
-            self.bounder = self.bounder.fit(llrs, instances.labels)
+            # determine the bounds for each LR-system individually
+            self.lower_llr_bounds = np.empty(llrs.shape[1])
+            self.upper_llr_bounds = np.empty(llrs.shape[1])
+            for i_system in range(llrs.shape[1]):
+                bounder = self.bounder.fit(llrs[:, i_system], instances.labels)
+                self.lower_llr_bounds[i_system] = bounder.lower_llr_bound
+                self.upper_llr_bounds[i_system] = bounder.upper_llr_bound
         return self
 
     def transform(self, instances: FeatureData) -> LLRData:
@@ -62,7 +70,9 @@ class McmcLLRModel(Transformer):
         logp_h2 = self.model_h2.transform(instances.features)
         llrs = logp_h1 - logp_h2
         if self.bounder is not None:
-            llrs = self.bounder.transform(llrs)
+            # apply the bounds to all the LR-systems in one go
+            llrs = np.where(self.lower_llr_bounds < llrs, llrs, self.lower_llr_bounds)
+            llrs = np.where(self.upper_llr_bounds > llrs, llrs, self.upper_llr_bounds)
         quantiles = np.quantile(llrs, [0.5] + list(self.interval), axis=1, method="midpoint")
         return instances.replace_as(LLRData, features=quantiles.transpose(1, 0))
 
