@@ -141,9 +141,10 @@ experiments:
     strategy: single_run
     lr_system: ${aperture_shear_ccf_lrsystem}
     data: ${aperture_shear_data}
-    metrics:
-      - cllr
-      - cllr_min
+    aggregation:
+      metrics:
+        - cllr
+        - cllr_min
     visualization:
       - pav
       - ece
@@ -155,9 +156,10 @@ experiments:
     strategy: single_run
     lr_system: ${firing_pin_impression_accf_lrsystem}
     data: ${firing_pin_impression_data}
-    metrics:
-      - cllr
-      - cllr_min
+    aggregation:
+      metrics:
+        - cllr
+        - cllr_min
     visualization:
       - pav
       - ece
@@ -167,9 +169,10 @@ experiments:
     strategy: single_run
     lr_system: ${breech_face_impression_accf_lrsystem}
     data: ${breech_face_impression_data}
-    metrics:
-      - cllr
-      - cllr_min
+    aggregation:
+      metrics:
+        - cllr
+        - cllr_min
     visualization:
       - pav
       - ece
@@ -179,9 +182,10 @@ experiments:
     strategy: single_run
     lr_system: ${breech_face_impression_cmc_lrsystem}
     data: ${breech_face_impression_data}
-    metrics:
-      - cllr
-      - cllr_min  
+    aggregation:
+      metrics:
+        - cllr
+        - cllr_min  
     visualization:
       - pav
       - ece
