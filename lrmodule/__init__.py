@@ -6,34 +6,32 @@ from lir.data.models import FeatureData, LLRData
 from lir.lrsystems.lrsystems import LRSystem
 
 from lrmodule import persistence
-from lrmodule.data import get_dataset_id
 from lrmodule.data_types import ModelSettings
 from lrmodule.lrsystem import get_trained_model
 
 
-def get_model(settings: ModelSettings, training_data: FeatureData, cache_dir: Path | None) -> LRSystem:
+def get_model(settings: ModelSettings, training_data: FeatureData, model_storage_path: Path | None) -> LRSystem:
     """
     Obtain a model by loading it from disk, or by fitting it from training data.
 
     :param settings: model settings
     :param training_data: training data
-    :param cache_dir: cache dir
+    :param model_storage_path: path where trained LR models are stored
     :return: a fitted LR system
     """
-    dataset_id = get_dataset_id(training_data)
-    model = None if not cache_dir else persistence.load_model(settings, dataset_id, cache_dir)
+    model = None if not model_storage_path else persistence.load_model(settings, model_storage_path)
     if not model:
         model = get_trained_model(settings, training_data)
-        if cache_dir:
-            persistence.save_model(model, settings, dataset_id, cache_dir)
+        if model_storage_path:
+            persistence.save_model(model, settings, model_storage_path)
     return model
 
 
 def calculate_llrs(
-    features: np.ndarray, settings: ModelSettings, training_data: FeatureData, cache_dir: Path | None
+    features: np.ndarray, settings: ModelSettings, training_data: FeatureData, model_storage_path: Path | None
 ) -> LLRData:
     """Calculate LLRs after fitting a model with a training set."""
-    model = get_model(settings, training_data, cache_dir)
+    model = get_model(settings, training_data, model_storage_path)
     return model.apply(FeatureData(features=features))
 
 
