@@ -48,6 +48,8 @@ class McmcLLRModel(Transformer):
 
     def fit(self, instances: FeatureData) -> Self:
         """Fit the defined model to the supplied instances."""
+        if instances.labels is None:
+            raise ValueError("Labels are required to fit this model.")
         self.model_h1.fit(instances.features[instances.labels == 1])
         self.model_h2.fit(instances.features[instances.labels == 0])
         if self.bounder is not None:
