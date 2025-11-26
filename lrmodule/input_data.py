@@ -30,6 +30,11 @@ class ScratchData(DataStrategy):
         In the CSV file, subsets of the data are indicated by the "split<N>" column. For example, 3-fold cross
         validation is represented through columns 'split1', 'split2' and 'split3' which indicate if the data in
         this subset belongs to the test split ("t"), train split ("v") or is not used ("n").
+
+        The FeatureData instances are created from all columns that are not part of the expected columns:
+        'weapon1', 'weapon2', 'hypothesis', 'split<N>' (for all N). The 'hypothesis' column is used as label.
+        The remaining columns are treated as features. This means that the pipeline in which this data is used
+        should filter out any non-relevant feature columns before training or evaluating a model.
         """
         df = pd.read_csv(self.file_path)
 
