@@ -22,9 +22,10 @@ experiments:
     strategy: single_run
     lr_system: ${aperture_shear_ccf_lrsystem}
     data: ${aperture_shear_ccf_data}
-    metrics:
-      - cllr
-      - cllr_min
+    aggregation:
+      metrics:
+        - cllr
+        - cllr_min
     visualization:
       - pav
       - ece
