@@ -1,16 +1,15 @@
 from pathlib import Path
 
 import confidence
-import pytest
 from lir.config.experiment_strategies import parse_experiments_setup
 
 
 def test_validation_yaml():
+    """Test if the validation.yaml file can be parsed correctly.
+    
+    Does not test correctness of the content, only that it can be parsed without errors.
+    Running the whole setup will take too long for a unit test.
+    """
     validation_file = Path(__file__).parent.parent / "validation.yaml"
     setup, _ = parse_experiments_setup(confidence.loadf(validation_file))
-    for name, experiment in setup.items():
-        # TODO: once the experiments are working and data are accessible, this should not raise an exception
-        # Alternatively, run this test with fake data
-        with pytest.raises(Exception):
-            experiment.run()
 

@@ -30,6 +30,11 @@ class ScratchData(DataStrategy):
         In the CSV file, subsets of the data are indicated by the "split<N>" column. For example, 3-fold cross
         validation is represented through columns 'split1', 'split2' and 'split3' which indicate if the data in
         this subset belongs to the test split ("t"), train split ("v") or is not used ("n").
+
+        The FeatureData instances are created from all columns that are not part of the expected columns:
+        'weapon1', 'weapon2', 'hypothesis', 'split<N>' (for all N). The 'hypothesis' column is used as label.
+        The remaining columns are treated as features. This means that the pipeline in which this data is used
+        should filter out any non-relevant feature columns before training or evaluating a model.
         """
         df = pd.read_csv(self.file_path)
 
@@ -40,15 +45,11 @@ class ScratchData(DataStrategy):
                 f"Missing one of the expected columns: {', '.join(set(expected_columns) - set(df.columns))}"
             )
 
-        if "accf" in df.columns:
-            feature_columns = ["accf"]
-        elif "ccf" in df.columns:
-            feature_columns = ["ccf"]
-        else:
-            raise ValueError("Missing one of the expected feature columns: 'accf' or 'ccf'")
-
         # Find all columns regarding the prepared folds, named 'split*' ('split1', 'split2', etc.)
         fold_column_names = [c for c in df.columns if c.startswith("split")]
+
+        # Feature columns are all columns that are not the expected columns
+        feature_columns = [c for c in df.columns if c not in expected_columns and c not in fold_column_names]
 
         label_column = ["hypothesis"]
 
@@ -73,7 +74,7 @@ class ScratchData(DataStrategy):
             for test_or_train_indicator, raw_data in test_train_folds.groupby("test_train_split"):
                 # The `test_or_train_indicator` refers to the role of this data
                 # in the current fold; belonging to either the 'test' or 'train' split.
-                features = raw_data[feature_columns].to_numpy(dtype=float)
+                features = raw_data[feature_columns].to_numpy(dtype=float).reshape(-1, len(feature_columns))
                 labels = raw_data[label_column].to_numpy(dtype=int).flatten()
 
                 subset_folds[test_or_train_indicator] = FeatureData(features=features, labels=labels)
