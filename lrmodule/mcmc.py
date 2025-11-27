@@ -18,7 +18,7 @@ class McmcLLRModel(Transformer):
     determined.
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913 (more than five arguments are allowed)
         self,
         distribution_h1: str,
         parameters_h1: dict[str, dict[str, int]] | None,
@@ -80,7 +80,7 @@ class McmcLLRModel(Transformer):
 
 
 class McmcModel:
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913 (more than five arguments are allowed)
         self,
         distribution: str,
         parameters: dict[str, dict[str, int]] | None,
