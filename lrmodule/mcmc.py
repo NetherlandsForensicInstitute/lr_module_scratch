@@ -67,7 +67,7 @@ class McmcLLRModel(Transformer):
         logp_h1 = self.model_h1.transform(instances.features)
         logp_h2 = self.model_h2.transform(instances.features)
         llrs = logp_h1 - logp_h2
-        if self.bounding is not None:
+        if (self.bounding is not None) and (self.bounders is not None):
             # apply the bounders one by one
             for i_system in range(llrs.shape[1]):
                 llrs[:, i_system] = self.bounders[i_system].transform(llrs[:, i_system])

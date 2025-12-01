@@ -92,7 +92,7 @@ def test_llr_dataset(dataset_name: str):
         cfg.parameters_h1,
         cfg.distribution_h2,
         cfg.parameters_h2,
-        bounder=None,
+        bounding=None,
         random_seed=cfg.random_seed,
     )
     model.fit(FeatureData(features=features, labels=labels))
