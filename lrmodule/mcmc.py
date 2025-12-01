@@ -3,6 +3,7 @@ from typing import Self
 import arviz as az
 import numpy as np
 import pymc as pm
+from lir.algorithms.bayeserror import ELUBBounder
 from lir.bounding import LLRBounder
 from lir.data.models import FeatureData, LLRData
 from lir.transform import Transformer
@@ -24,7 +25,7 @@ class McmcLLRModel(Transformer):
         parameters_h1: dict[str, dict[str, int]] | None,
         distribution_h2: str,
         parameters_h2: dict[str, dict[str, int]] | None,
-        bounding: LLRBounder | None,
+        bounding: LLRBounder | None = ELUBBounder(),
         interval: tuple[float, float] = (0.05, 0.95),
         **mcmc_kwargs,
     ):
