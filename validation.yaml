@@ -1,19 +1,19 @@
-output: output/${timestamp}_validation
+output_path: output/${timestamp}_validation
 data_root: data  # update this path
 
-aperture_shear_data:
-  strategy: lrmodule.input_data.ScratchData
+aperture_shear_data: &aperture_shear_data
+  method: lrmodule.input_data.ScratchCsvReader
   input_file_path: ${data_root}/aperture_shear.csv
 
-firing_pin_impression_data:
-  strategy: lrmodule.input_data.ScratchData
+firing_pin_impression_data: &firing_pin_impression_data
+  method: lrmodule.input_data.ScratchCsvReader
   input_file_path: ${data_root}/firing_pin_impression.csv
 
-breech_face_impression_data:
-  strategy: lrmodule.input_data.ScratchData
+breech_face_impression_data: &breech_face_impression_data
+  method: lrmodule.input_data.ScratchCsvReader
   input_file_path: ${data_root}/breech_face_impression.csv
 
-aperture_shear_ccf_lrsystem:
+aperture_shear_ccf_lrsystem: &aperture_shear_ccf_lrsystem
   architecture: lrmodule.binary_lrsystem
   modules:
     steps:
@@ -33,7 +33,7 @@ aperture_shear_ccf_lrsystem:
               - 0.23  # KM kernel size
           elub: elub_bounder
 
-firing_pin_impression_accf_lrsystem:
+firing_pin_impression_accf_lrsystem: &firing_pin_impression_accf_lrsystem
   architecture: lrmodule.binary_lrsystem
   modules:
     steps:
@@ -54,7 +54,7 @@ firing_pin_impression_accf_lrsystem:
               - 0.14  # KM kernel size
           elub: elub_bounder
 
-breech_face_impression_accf_lrsystem:
+breech_face_impression_accf_lrsystem: &breech_face_impression_accf_lrsystem
   architecture: lrmodule.binary_lrsystem
   modules:
     steps:
@@ -75,7 +75,7 @@ breech_face_impression_accf_lrsystem:
               - 0.11  # KM kernel size
           elub: elub_bounder
 
-firing_pin_impression_cmc_lrsystem:
+firing_pin_impression_cmc_lrsystem: &firing_pin_impression_cmc_lrsystem
   architecture: lrmodule.binary_lrsystem
   modules:
     steps:
@@ -106,7 +106,7 @@ firing_pin_impression_cmc_lrsystem:
       elub: elub_bounder  # does this work with the interval? (TODO: ticket)
 
 
-breech_face_impression_cmc_lrsystem:
+breech_face_impression_cmc_lrsystem: &breech_face_impression_cmc_lrsystem
   architecture: lrmodule.binary_lrsystem
   modules:
     steps:
@@ -137,56 +137,68 @@ breech_face_impression_cmc_lrsystem:
       # elub: elub_bounder  # does this work with the interval? (TODO: ticket)
 
 experiments:
-  aperture_shear_model:
+  - name: aperture_shear_model
     strategy: single_run
-    lr_system: ${aperture_shear_ccf_lrsystem}
-    data: ${aperture_shear_data}
-    aggregation:
-      metrics:
-        - cllr
-        - cllr_min
-    visualization:
+    lr_system: *aperture_shear_ccf_lrsystem
+    data:
+      provider: *aperture_shear_data
+      splits:
+        strategy: lrmodule.input_data.PredefinedCrossValidation
+    output:
+      - method: metrics
+        columns:
+          - cllr
+          - cllr_min
       - pav
       - ece
       - llr_interval
       # - score_histogram (ongetransformeerd)
       # - score_histogram (normalized (area=1))
       
-  firing_pin_impression_model:
+  - name: firing_pin_impression_model
     strategy: single_run
-    lr_system: ${firing_pin_impression_accf_lrsystem}
-    data: ${firing_pin_impression_data}
-    aggregation:
-      metrics:
-        - cllr
-        - cllr_min
-    visualization:
+    lr_system: *firing_pin_impression_accf_lrsystem
+    data:
+      provider: *firing_pin_impression_data
+      splits:
+        strategy: lrmodule.input_data.PredefinedCrossValidation
+    output:
+      - method: metrics
+        columns:
+          - cllr
+          - cllr_min
       - pav
       - ece
       - llr_interval
 
-  breech_face_impression_model_accf:
+  - name: breech_face_impression_model_accf
     strategy: single_run
-    lr_system: ${breech_face_impression_accf_lrsystem}
-    data: ${breech_face_impression_data}
-    aggregation:
-      metrics:
-        - cllr
-        - cllr_min
-    visualization:
+    lr_system: *breech_face_impression_accf_lrsystem
+    data:
+      provider: *breech_face_impression_data
+      splits:
+        strategy: lrmodule.input_data.PredefinedCrossValidation
+    output:
+      - method: metrics
+        columns:
+          - cllr
+          - cllr_min
       - pav
       - ece
       - llr_interval
 
-  breech_face_impression_model_cmc:
+  - name: breech_face_impression_model_cmc
     strategy: single_run
-    lr_system: ${breech_face_impression_cmc_lrsystem}
-    data: ${breech_face_impression_data}
-    aggregation:
-      metrics:
-        - cllr
-        - cllr_min  
-    visualization:
+    lr_system: *breech_face_impression_cmc_lrsystem
+    data:
+      provider: *breech_face_impression_data
+      splits:
+        strategy: lrmodule.input_data.PredefinedCrossValidation
+    output:
+      - method: metrics
+        columns:
+          - cllr
+          - cllr_min
       - pav
       - ece
       - llr_interval
