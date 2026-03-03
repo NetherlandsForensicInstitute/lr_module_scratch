@@ -4,9 +4,8 @@ import confidence
 import numpy as np
 import pandas as pd
 import pytest
+from lir.algorithms.mcmc import McmcModel, McmcLLRModel
 from lir.data.models import FeatureData
-
-from lrmodule.mcmc import McmcLLRModel, McmcModel
 
 # Tests against references from the Matlab implementation.
 
@@ -96,7 +95,7 @@ def test_llr_dataset(dataset_name: str):
         random_seed=cfg.random_seed,
     )
     model.fit(FeatureData(features=features, labels=labels))
-    llrs = model.transform(FeatureData(features=scores_eval))
+    llrs = model.apply(FeatureData(features=scores_eval))
     llrs_ref = np.loadtxt(base_directory / (csv_prefix + "-llr_unbound.csv"), delimiter=",")
     assert np.allclose(llrs.llrs, llrs_ref[1], rtol=5e-2, atol=5e-2)
     assert np.allclose(llrs.llr_intervals[:, 0], llrs_ref[0], rtol=5e-2, atol=5e-2)  # type: ignore
