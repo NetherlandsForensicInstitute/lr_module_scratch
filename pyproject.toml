@@ -13,7 +13,13 @@ readme = "README.md"
 license = {text = "Apache Software License 2.0"}
 
 lir = {url = "https://github.com/NetherlandsForensicInstitute/lir", rev = "335f8e0dc458b3d969b1a126e492c04cbf8499ab" }
-dependencies = ["lir", "pandas>=2.3.3", "arviz>=0.22.0", "pymc>=5.26.1", "pytest-randomly>=4.0.1"]
+dependencies = [
+    "lir==1.0.0",
+    "pandas>=2.3.3",
+    "arviz>=0.22.0",
+    "pymc>=5.26.1",
+    "pytest-randomly>=4.0.1",
+]
 
 [project.urls]
 homepage = "https://github.com/NetherlandsForensicInstitute/lr_module_scratch/"
