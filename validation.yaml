@@ -82,7 +82,7 @@ firing_pin_impression_cmc_lrsystem: &firing_pin_impression_cmc_lrsystem
       select:
         method: lrmodule.helpers.select_marktype_cmc
       mcmc:
-        method: lrmodule.mcmc.McmcLLRModel
+        method: mcmc
         # parameters copied from MCMC test
         distribution_h1: betabinomial
         parameters_h1:
@@ -113,7 +113,7 @@ breech_face_impression_cmc_lrsystem: &breech_face_impression_cmc_lrsystem
       select:
         method: lrmodule.helpers.select_marktype_cmc
       mcmc:
-        method: lrmodule.mcmc.McmcLLRModel
+        method: mcmc
         # parameters copied from MCMC test
         distribution_h1: betabinomial
         parameters_h1:
