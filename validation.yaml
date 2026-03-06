@@ -189,6 +189,12 @@ experiments:
       - method: lrmodule.copy_csv.copy_csv
         file: ${data_root}/breech_face_impression.csv
         new_file_name: source_data.csv
+      - method: lrmodule.copy_csv.copy_csv
+        file: ${data_root}/breech_face_impression.csv
+        new_file_name: reference_data.csv
+        columns:
+          - hypothesis
+          - accf
       - save_model
 
 
