@@ -186,6 +186,11 @@ experiments:
       - pav
       - ece
       - llr_interval
+      - method: lrmodule.copy_csv.copy_csv
+        file: ${data_root}/breech_face_impression.csv
+        new_file_name: source_data.csv
+      - save_model
+
 
   - name: breech_face_impression_model_cmc
     strategy: single_run
