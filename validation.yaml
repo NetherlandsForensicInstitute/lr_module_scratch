@@ -188,13 +188,7 @@ experiments:
       - llr_interval
       - method: lrmodule.copy_csv.copy_csv
         file: ${data_root}/breech_face_impression.csv
-      - method: lrmodule.copy_csv.copy_csv
-        file: ${data_root}/breech_face_impression.csv
-        columns:
-          - hypothesis
-          - cmc
-          - n 
-        new_file_name: reference_scores.csv
+        new_file_name: source_data.csv
       - save_model
 
 
