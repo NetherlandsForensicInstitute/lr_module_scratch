@@ -5,6 +5,7 @@ output/
 lrsystem_output/
 .testmondata
 tests/test_model_storage/
+tests/saved_models/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

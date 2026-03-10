@@ -152,6 +152,13 @@ experiments:
       - pav
       - ece
       - llr_interval
+      - save_model
+      - method: lrmodule.copy_csv.copy_csv
+        file: ${data_root}/aperture_shear.csv
+        new_file_name: reference_data.csv
+        columns:
+          - hypothesis
+          - ccf
       # - score_histogram (ongetransformeerd)
       # - score_histogram (normalized (area=1))
       
@@ -167,9 +174,16 @@ experiments:
         columns:
           - cllr
           - cllr_min
+      - method: lrmodule.copy_csv.copy_csv
+        file: ${data_root}/firing_pin_impression.csv
+        new_file_name: reference_data.csv
+        columns:
+          - hypothesis
+          - accf
       - pav
       - ece
       - llr_interval
+      - save_model
 
   - name: breech_face_impression_model_accf
     strategy: single_run
@@ -210,7 +224,15 @@ experiments:
         columns:
           - cllr
           - cllr_min
+      - method: lrmodule.copy_csv.copy_csv
+        file: ${data_root}/breech_face_impression.csv
+        new_file_name: reference_data.csv
+        columns:
+          - hypothesis
+          - cmc
+          - n
       - pav
       - ece
       - llr_interval
+      - save_model
 
