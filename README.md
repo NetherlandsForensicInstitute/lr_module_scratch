@@ -19,7 +19,7 @@ All typing, linting and formatting configuration was taken from the Scratch repo
 
 ## Model validation
 
-1. Update hyperparameters, experiment setup and data path as needed in `validation.yaml`;
-2. Run validation experiments as `pdm run lir validation.yaml`;
+1. Update hyperparameters, experiment setup and data path as needed in `models/[NAME]/validation.yaml`;
+2. Run validation experiments as `pdm run lir models/[NAME]/validation.yaml`;
 3. Inspect the results in the output folder;
 4. When satisfied, update the stored model (TODO).
