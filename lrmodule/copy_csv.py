@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 from lir.aggregation import Aggregation, ContextAwareDict, config_parser, partial, pop_field
+from lir.data.io import search_path
 from lir.util import check_type
 
 
@@ -19,7 +20,7 @@ class CopyCSV(Aggregation):
     """
 
     def __init__(self, source_file: str, target_dir: str, columns: list[str], new_file_name: str | None):
-        self.source_file = Path(source_file)
+        self.source_file = search_path(Path(source_file))
         self.target_dir = Path(target_dir)
         self.columns = columns
         if new_file_name is None:
