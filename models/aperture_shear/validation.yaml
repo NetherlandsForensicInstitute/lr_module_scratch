@@ -1,0 +1,51 @@
+output_path: output/${timestamp}_aperture_shear
+input_file_path: data.csv  # update path
+
+aperture_shear_ccf_lrsystem: &aperture_shear_ccf_lrsystem
+  architecture: lrmodule.binary_lrsystem
+  modules:
+    steps:
+      transform:
+        method: lrmodule.helpers.transform_marktype_ccf
+      bootstrap:
+        method: bootstrap
+        n_bootstraps: 2
+        seed: 0
+        points: equidistant
+        n_points: 100
+        steps:
+          kde:
+            method: kde
+            bandwidth:
+              - 0.05  # KNM kernel size
+              - 0.23  # KM kernel size
+          elub: elub_bounder
+
+experiments:
+  - name: model
+    strategy: single_run
+    lr_system: *aperture_shear_ccf_lrsystem
+    data:
+      provider:
+        method: lrmodule.input_data.ScratchCsvReader
+        input_file_path: ${input_file_path}
+
+      splits:
+        strategy: lrmodule.input_data.PredefinedCrossValidation
+    output:
+      - method: metrics
+        columns:
+          - cllr
+          - cllr_min
+      - pav
+      - ece
+      - llr_interval
+      - save_model
+      - method: lrmodule.copy_csv.copy_csv
+        file: ${input_file_path}
+        new_file_name: reference_data.csv
+        columns:
+          - hypothesis
+          - ccf
+      # - score_histogram (ongetransformeerd)
+      # - score_histogram (normalized (area=1))

@@ -1,0 +1,58 @@
+output_path: output/${timestamp}_firing_pin_impression
+input_file_path: data.csv  # update path
+
+lrsystem: &lrsystem
+  architecture: lrmodule.binary_lrsystem
+  modules:
+    steps:
+      select:
+        method: lrmodule.helpers.select_marktype_cmc
+      mcmc:
+        method: mcmc
+        # parameters copied from MCMC test
+        distribution_h1: betabinomial
+        parameters_h1:
+            alpha:
+              prior: uniform
+              lower: 0.01
+              upper: 100
+            beta:
+              prior: uniform
+              lower: 0.01
+              upper: 100
+        distribution_h2: binomial
+        parameters_h2:
+          p:
+            prior: beta
+            alpha: 0.5
+            beta: 0.5
+        interval:
+          - 0.05
+          - 0.95
+      elub: elub_bounder  # does this work with the interval? (TODO: ticket)
+
+experiments:
+  - name: model
+    strategy: single_run
+    lr_system: *lrsystem
+    data:
+      provider:
+        method: lrmodule.input_data.ScratchCsvReader
+        input_file_path: ${input_file_path}
+      splits:
+        strategy: lrmodule.input_data.PredefinedCrossValidation
+    output:
+      - method: metrics
+        columns:
+          - cllr
+          - cllr_min
+      - method: lrmodule.copy_csv.copy_csv
+        file: ${input_file_path}
+        new_file_name: reference_data.csv
+        columns:
+          - hypothesis
+          - accf
+      - pav
+      - ece
+      - llr_interval
+      - save_model
