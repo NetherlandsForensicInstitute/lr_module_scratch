@@ -2,16 +2,22 @@ from pathlib import Path
 
 import numpy as np
 from lir.data.models import FeatureData
+from lir.datasets.feature_data_csv import ExtraField, FeatureDataCsvFileParser
 from numpy import array
 
-from lrmodule.input_data import ScratchCsvReader, PredefinedCrossValidation
+from lrmodule.input_data import PredefinedCrossValidation
 
 
 def test_input_data_to_instances():
     """Check that input data is correctly parsed to instances (having multiple folds)."""
     # Arrange
     input_file = Path(__file__).parent / "fixtures/input_data/train_test_data.csv"
-    dataset = ScratchCsvReader(input_file).get_instances()
+    dataset = FeatureDataCsvFileParser(
+        file=input_file,
+        label_column="hypothesis",
+        source_id_column=["weapon1", "weapon2"],
+        extra_fields=[ExtraField("split", ["split1", "split2", "split3"], str)],
+    ).get_instances()
     strategy = PredefinedCrossValidation()
 
     # The following train/test splits for the given data_subsets are expected
@@ -34,8 +40,9 @@ def test_input_data_to_instances():
     ]
 
     # Act
-    assert dataset.split.shape == (5, 3), "role assignment shape should match the input data"
-    assert np.all(dataset.split[:, 0] == np.array(['t', 'v', 'v', 'n', 't']))
+    split = getattr(dataset, "split")
+    assert split.shape == (5, 3), "role assignment shape should match the input data"
+    assert np.all(split[:, 0] == np.array(["t", "v", "v", "n", "t"]))
 
     data_subsets = list(strategy.apply(dataset))
 
@@ -43,6 +50,8 @@ def test_input_data_to_instances():
     # The fixture contains 3 subsets of data (3-fold cross validation)
     assert len(data_subsets) == 3  # noqa: PLR2004 (magic number)
 
-    for i, ((actual_train, actual_test), (expected_train, expected_test)) in enumerate(zip(data_subsets, [subset_1, subset_2, subset_3])):
+    for i, ((actual_train, actual_test), (expected_train, expected_test)) in enumerate(
+        zip(data_subsets, [subset_1, subset_2, subset_3])
+    ):
         assert FeatureData(features=actual_train.features, labels=actual_train.labels) == expected_train
         assert FeatureData(features=actual_test.features, labels=actual_test.labels) == expected_test
