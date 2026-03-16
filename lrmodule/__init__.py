@@ -1,10 +1,13 @@
 import pickle
 from pathlib import Path
 
+import confidence
 from lir.config.lrsystem_architectures import specific_source
 from lir.data.models import FeatureData
 from lir.datasets.feature_data_csv import FeatureDataCsvFileParser
+from lir.experiments import Experiment
 from lir.lrsystems.lrsystems import LRSystem
+from lir.main import initialize_experiments
 
 
 def get_lr_system(lr_system_folder: Path, file_name: str = "model.pkl") -> LRSystem:
@@ -48,6 +51,22 @@ def get_reference_data(lr_system_folder: Path, file_name: str = "reference_data.
     """
     reference_data_file = lr_system_folder / file_name
     return FeatureDataCsvFileParser(file=reference_data_file, label_column="hypothesis").get_instances()
+
+
+def get_validation_experiment(model_name: str, training_data_path: Path, output_path: Path) -> tuple[Experiment, Path]:
+    """
+    Return an `Experiment` that builds and validates a model.
+
+    The `lr_system_folder` will be created in `output_path` under the name "model".
+    """
+    yaml_file = Path(__file__).parent / "models" / model_name / "validation.yaml"
+    yaml_update = {
+        "output_path": str(output_path),
+        "input_file_path": str(training_data_path),
+    }
+    cfg = confidence.Configuration(confidence.loadf(yaml_file), yaml_update)
+    exps, _ = initialize_experiments(cfg)
+    return exps["model"], output_path / "model"
 
 
 # create an alias for the specific source system, since the architecture is identical but the name is misleading
