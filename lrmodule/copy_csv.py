@@ -22,6 +22,10 @@ class CopyCSV(Aggregation):
     def __init__(self, source_file: str, target_dir: str, columns: list[str], new_file_name: str | None):
         self.source_file = search_path(Path(source_file))
         self.target_dir = Path(target_dir)
+
+        # Ensure the target directory exists or create it
+        self.target_dir.mkdir(parents=True, exist_ok=True)
+
         self.columns = columns
         if new_file_name is None:
             self.new_file_name = self.target_dir / self.source_file.name
