@@ -18,7 +18,8 @@ class PredefinedCrossValidation(DataStrategy):
 
     def apply(self, instances: FeatureData) -> Iterable[tuple[FeatureData, FeatureData]]:
         """Return a series of train/test sets for a predefined cross-validation setup."""
-        for split in range(len(instances.split[0])):
-            training_data = instances[instances.split[:, split] == TestTrainSplit.TRAIN.value]  # type: ignore
-            test_data = instances[instances.split[:, split] == TestTrainSplit.TEST.value]  # type: ignore
+        role_assignments = instances.split  # type: ignore
+        for split in range(role_assignments.shape[1]):
+            training_data = instances[role_assignments[:, split] == TestTrainSplit.TRAIN.value]
+            test_data = instances[role_assignments[:, split] == TestTrainSplit.TEST.value]
             yield training_data, test_data
