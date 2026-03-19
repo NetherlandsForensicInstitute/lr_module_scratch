@@ -13,15 +13,12 @@ class TestTrainSplit(StrEnum):
     TEST = "v"
 
 
-SPLIT_COLUMNS = ["split1", "split2", "split3"]
-
-
 class PredefinedCrossValidation(DataStrategy):
     """Return a series of train/test sets for a predefined cross-validation setup."""
 
     def apply(self, instances: FeatureData) -> Iterable[tuple[FeatureData, FeatureData]]:
         """Return a series of train/test sets for a predefined cross-validation setup."""
-        for split in range(len(SPLIT_COLUMNS)):
+        for split in range(len(instances.split[0])):
             training_data = instances[instances.split[:, split] == TestTrainSplit.TRAIN.value]  # type: ignore
             test_data = instances[instances.split[:, split] == TestTrainSplit.TEST.value]  # type: ignore
             yield training_data, test_data
