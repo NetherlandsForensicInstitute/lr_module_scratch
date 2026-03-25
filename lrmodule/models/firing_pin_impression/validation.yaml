@@ -5,6 +5,7 @@ lrsystem: &lrsystem
   architecture: lrmodule.binary_lrsystem
   modules:
     steps:
+      validate_data: validate_feature_data_type
       mcmc:
         method: mcmc
         # parameters copied from MCMC test

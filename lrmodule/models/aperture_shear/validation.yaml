@@ -5,6 +5,7 @@ aperture_shear_ccf_lrsystem: &aperture_shear_ccf_lrsystem
   architecture: lrmodule.binary_lrsystem
   modules:
     steps:
+      validate_data: validate_feature_data_type
       transform:
         method: lrmodule.helpers.transform_marktype_ccf
       bootstrap:

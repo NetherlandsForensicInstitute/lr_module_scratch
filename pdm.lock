@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:fbd9387bbac757a746bc9c3282b18f4ca020292dbcb406e63e138c4fe0a72d5f"
+content_hash = "sha256:54e9e3d6c925e4d6ec54d9dc25280e314b7677b4a525b25ddc81c539f88de21e"
 
 [[metadata.targets]]
 requires_python = ">=3.13,<3.14"
@@ -594,7 +594,7 @@ files = [
 
 [[package]]
 name = "lir"
-version = "1.4.0"
+version = "1.5.1"
 requires_python = "<3.15,>=3.12"
 summary = "Package for optimising and evaluating Likelihood Ratio (LR) systems."
 groups = ["default"]
@@ -609,13 +609,12 @@ dependencies = [
     "pydantic>=2.12.3",
     "pymc>=5.21.0",
     "requests-cache>=1.2.1",
-    "requests>=2.32.5",
     "scikit-learn>=1.2",
     "scipy>=1.13.1",
     "tqdm>=4.67.1",
 ]
 files = [
-    {file = "lir-1.4.0-py3-none-any.whl", hash = "sha256:d7219a9c43a14b7760add4ecb8cba840953f59c72e7a0557de2435e54e9e0b89"},
+    {file = "lir-1.5.1-py3-none-any.whl", hash = "sha256:e1271f61af3d50f8af1f43ba9f2de1b0683e0c06b51661d9b4a8f6c8680bea27"},
 ]
 
 [[package]]
