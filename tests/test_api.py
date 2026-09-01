@@ -1,11 +1,5 @@
-import os
-import sys
-
-import confidence
-import pytest
 from lir.data.models import FeatureData
 from lir.lrsystems import LRSystem
-from lir.main import initialize_experiments
 from lir.util import check_type
 
 from lrmodule import Path, get_lr_system, get_reference_data
