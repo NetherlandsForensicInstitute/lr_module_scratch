@@ -234,3 +234,4 @@ devenv.local.nix
 api.pid
 .testmondata-wal
 .testmondata-shm
+scripts/local.yaml
