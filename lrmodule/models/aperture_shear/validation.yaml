@@ -1,5 +1,5 @@
 output_path: output/${timestamp}_aperture_shear
-input_file_path: data.csv  # update path
+input_file_path: data/aperture_shear.csv
 
 aperture_shear_ccf_lrsystem: &aperture_shear_ccf_lrsystem
   architecture: lrmodule.binary_lrsystem
@@ -31,7 +31,7 @@ experiments:
         method: parse_features_from_csv_file
         file: ${input_file_path}
         label_column: hypothesis
-        source_id_column: 
+        source_id_column:
           - weapon1
           - weapon2
         extra_fields:
