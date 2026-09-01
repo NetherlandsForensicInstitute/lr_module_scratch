@@ -1,6 +1,6 @@
 # LR module for Scratch
 
-This work accompanies the corresponding Scratch repository: https://github.com/NetherlandsForensicInstitute/scratch.
+This work accompanies the corresponding [Scratch repository](https://github.com/NetherlandsForensicInstitute/scratch).
 Within this specific repository, the LR module - responsible for calculating the appropriate statistical data - is provided.
 
 From the `lrmodule` python module, several public API methods are exposed:
@@ -32,8 +32,8 @@ For example, instead of `pdm run lir models/[NAME]/validation.yaml`:
 
 - Create a new 'Run/Debug configuration', with the following settings:
 - Select the 'Python' template/default to start from
-- Instead of 'script' select 'module', and specify 'lir'
-- As 'Script parameters', specify 'lrmodule/models/[NAME]/validation.yaml'
+- Instead of 'script' select 'module', and specify `lir`
+- As 'Script parameters', specify `lrmodule/models/[NAME]/validation.yaml`
 - Make that the path to this repo is used as 'Working directory'
 
-See https://www.jetbrains.com/help/pycharm/run-debug-configuration.html for more info.
+See the [PyCharm documentation](https://www.jetbrains.com/help/pycharm/run-debug-configuration.html) for more info.
