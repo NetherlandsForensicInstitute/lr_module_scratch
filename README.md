@@ -4,7 +4,9 @@ This work accompanies the corresponding Scratch repository: https://github.com/N
 Within this specific repository, the LR module - responsible for calculating the appropriate statistical data - is provided.
 
 From the `lrmodule` python module, several public API methods are exposed: 
- - ... (TODO)
+ - `get_lr_system`: load a trained LR system from disk from a given folder;
+ - `get_reference_data`: load reference data from disk;
+ - `get_validation_experiment`: return an `Experiment` that builds and validates a model.
 
 
 ## Local development
