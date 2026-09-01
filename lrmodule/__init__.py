@@ -9,6 +9,12 @@ from lir.experiments import Experiment
 from lir.lrsystems.lrsystems import LRSystem
 from lir.main import initialize_experiments
 
+__all__ = [
+    "get_lr_system",
+    "get_reference_data",
+    "get_validation_experiment",
+]
+
 
 def get_lr_system(lr_system_folder: Path, file_name: str = "model.pkl") -> LRSystem:
     """
