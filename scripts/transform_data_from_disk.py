@@ -77,7 +77,7 @@ if __name__ == "__main__":
         output_file = RELEVANT_MARKS[mark]["output_file"]
         headers = RELEVANT_MARKS[mark]["headers"]
 
-        output_file = Path(__file__).parent.parent / "data" / "2026" / f"{output_file}.csv"
+        output_file = Path(__file__).parent.parent / "data" / "2026" / f"{output_file}"
 
         mark_df = pd.DataFrame()
 
@@ -100,5 +100,12 @@ if __name__ == "__main__":
 
         mark_df["Weapon1"] = mark_df["Weapon1"].apply(get_and_hash_weapon_id)
         mark_df["Weapon2"] = mark_df["Weapon2"].apply(get_and_hash_weapon_id)
+
+        # Put 'Total Cells' and 'Matching Cells' columns at the end of the dataframe
+        if "Total Cells" in mark_df.columns and "Matching Cells" in mark_df.columns:
+            mark_df = mark_df[
+                [col for col in mark_df.columns if col not in ["Total Cells", "Matching Cells"]]
+                + ["Matching Cells", "Total Cells"]
+            ]
 
         mark_df.to_csv(output_file, index=False)
