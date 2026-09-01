@@ -25,7 +25,7 @@ aperture_shear_ccf_lrsystem: &aperture_shear_ccf_lrsystem
 experiments:
   - name: model
     strategy: single_run
-    lr_system: *aperture_shear_ccf_lrsystem
+    lrsystem: *aperture_shear_ccf_lrsystem
     data:
       provider:
         method: parse_features_from_csv_file
@@ -35,13 +35,9 @@ experiments:
           - weapon1
           - weapon2
         extra_fields:
-          - name: split
-            columns:
-            - split1
-            - split2
-            - split3
-            cell_type: str
-
+          - split1
+          - split2
+          - split3
       splits:
         strategy: lrmodule.input_data.PredefinedCrossValidation
     output:

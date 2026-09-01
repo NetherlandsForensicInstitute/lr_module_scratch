@@ -1,8 +1,10 @@
 import shutil
+from functools import partial
 from pathlib import Path
 
 import pandas as pd
-from lir.aggregation import Aggregation, ContextAwareDict, config_parser, partial, pop_field
+from lir.aggregation import Aggregation
+from lir.config.base import ContextAwareDict, config_parser, pop_field
 from lir.data.io import search_path
 from lir.util import check_type
 
