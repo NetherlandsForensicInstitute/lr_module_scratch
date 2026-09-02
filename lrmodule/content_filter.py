@@ -79,11 +79,19 @@ class _ConditionBuilder:
     """Builder for creating filter conditions based on instance data content."""
 
     @staticmethod
+    def _get_column_data(instances: InstanceData, column: str) -> np.ndarray:
+        """Get column data from instances, raising a clear error if the column doesn't exist."""
+        if not hasattr(instances, column):
+            available_fields = instances.all_fields
+            raise ValueError(f"Column '{column}' not found in data. Available fields: {available_fields}")
+        return getattr(instances, column)
+
+    @staticmethod
     def equals(column: str, value: str) -> Callable[[InstanceData], np.ndarray]:
         """Return a filter function that selects rows where column equals value."""
 
         def filter_fn(instances: InstanceData) -> np.ndarray:
-            col_data = getattr(instances, column)
+            col_data = _ConditionBuilder._get_column_data(instances, column)
             return col_data == value
 
         return filter_fn
@@ -93,7 +101,7 @@ class _ConditionBuilder:
         """Return a filter function that selects rows where column does not equal value."""
 
         def filter_fn(instances: InstanceData) -> np.ndarray:
-            col_data = getattr(instances, column)
+            col_data = _ConditionBuilder._get_column_data(instances, column)
             return col_data != value
 
         return filter_fn
@@ -103,8 +111,8 @@ class _ConditionBuilder:
         """Return a filter function that selects rows where two columns are equal."""
 
         def filter_fn(instances: InstanceData) -> np.ndarray:
-            col1_data = getattr(instances, column1)
-            col2_data = getattr(instances, column2)
+            col1_data = _ConditionBuilder._get_column_data(instances, column1)
+            col2_data = _ConditionBuilder._get_column_data(instances, column2)
             return col1_data == col2_data
 
         return filter_fn
@@ -114,8 +122,8 @@ class _ConditionBuilder:
         """Return a filter function that selects rows where two columns are not equal."""
 
         def filter_fn(instances: InstanceData) -> np.ndarray:
-            col1_data = getattr(instances, column1)
-            col2_data = getattr(instances, column2)
+            col1_data = _ConditionBuilder._get_column_data(instances, column1)
+            col2_data = _ConditionBuilder._get_column_data(instances, column2)
             return col1_data != col2_data
 
         return filter_fn
@@ -125,7 +133,7 @@ class _ConditionBuilder:
         """Return a filter function that selects rows where column value is in the list."""
 
         def filter_fn(instances: InstanceData) -> np.ndarray:
-            col_data = getattr(instances, column)
+            col_data = _ConditionBuilder._get_column_data(instances, column)
             return np.isin(col_data, values)
 
         return filter_fn
@@ -135,7 +143,7 @@ class _ConditionBuilder:
         """Return a filter function that selects rows where column value is not in the list."""
 
         def filter_fn(instances: InstanceData) -> np.ndarray:
-            col_data = getattr(instances, column)
+            col_data = _ConditionBuilder._get_column_data(instances, column)
             return ~np.isin(col_data, values)
 
         return filter_fn

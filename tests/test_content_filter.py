@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import numpy as np
+import pytest
 from lir.data.models import FeatureData
 from numpy import array
 
@@ -258,3 +259,40 @@ def test_filter_preserves_all_fields():
     assert np.all(result.labels == array([1, 1]))  # type: ignore[attr-defined]
     assert np.all(getattr(result, "weapon1") == array(["1", "1"]))
     assert np.all(getattr(result, "split1") == array(["t", "t"]))
+
+
+def test_filter_on_nonexistent_column():
+    """Test that filtering on a non-existent column raises a clear error."""
+    # Arrange
+    features = array([[1.0, 2.0], [3.0, 4.0]])
+    weapon1 = array(["1", "2"])
+    instances = FeatureData(features=features, weapon1=weapon1)
+
+    filter_fn = _ConditionBuilder.equals("nonexistent_column", "value")
+    content_filter = ContentFilter(filter_fn)
+
+    # Act & Assert
+    with pytest.raises(ValueError) as exc_info:
+        content_filter.apply(instances)
+
+    assert "nonexistent_column" in str(exc_info.value)
+    assert "not found in data" in str(exc_info.value)
+    assert "weapon1" in str(exc_info.value) or "features" in str(exc_info.value)
+
+
+def test_columns_equal_with_nonexistent_column():
+    """Test that columns_equal raises a clear error when a column doesn't exist."""
+    # Arrange
+    features = array([[1.0, 2.0], [3.0, 4.0]])
+    weapon1 = array(["1", "2"])
+    instances = FeatureData(features=features, weapon1=weapon1)
+
+    filter_fn = _ConditionBuilder.columns_equal("weapon1", "nonexistent")
+    content_filter = ContentFilter(filter_fn)
+
+    # Act & Assert
+    with pytest.raises(ValueError) as exc_info:
+        content_filter.apply(instances)
+
+    assert "nonexistent" in str(exc_info.value)
+    assert "not found in data" in str(exc_info.value)
