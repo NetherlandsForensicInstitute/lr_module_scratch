@@ -120,8 +120,8 @@ if __name__ == "__main__":
 
         mark_df.to_csv(debug_output_file, index=False)
 
-        mark_df["Type1"] = mark_df["UnhashedWeapon1"].apply(hash_weapon_type)
-        mark_df["Type2"] = mark_df["UnhashedWeapon2"].apply(hash_weapon_type)
+        mark_df["Type1"] = mark_df["UnhashedType1"].apply(hash_weapon_type)
+        mark_df["Type2"] = mark_df["UnhashedType2"].apply(hash_weapon_type)
 
         mark_df["Weapon1"] = mark_df["UnhashedWeapon1"].apply(hash_weapon_id)
         mark_df["Weapon2"] = mark_df["UnhashedWeapon2"].apply(hash_weapon_id)
