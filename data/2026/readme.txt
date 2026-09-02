@@ -7,13 +7,13 @@ The files are
 - firing_pin_impression.csv
 
 All files contain the following columns:
+- Type1: Hash of the weapon type. Hash is limited to 4 characters.
+- Type2: Hash of the weapon type, limited to 4 characters.
 - Weapon1: Hash of the path of the first weapon marks folder. Hash is limited to 10 characters.
 - Weapon2: Hash of the path of the second weapon marks folder. Hash is  limited to 10 characters.
 - Material1: Material of the first weapon mark, most often 'Nickel' or 'Brass'.
 - Material2: Material of the second weapon mark, most often 'nickel' or 'brass'.
 - Hypothesis: Either 0 (from different weapons) or 1 (from the same weapon).  
-- Type1: Hash of the weapon type. Hash is limited to 4 characters.
-- Type2: Hash of the weapon type, limited to 4 characters.
 
 The impression csv files also contain the following columns:
 - Matching Cells: Number of matching cells between the two weapon marks.
