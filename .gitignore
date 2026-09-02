@@ -6,6 +6,7 @@ lrsystem_output/
 .testmondata
 tests/test_model_storage/
 tests/saved_models/
+data/*/debug*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -234,3 +235,4 @@ devenv.local.nix
 api.pid
 .testmondata-wal
 .testmondata-shm
+scripts/local.yaml

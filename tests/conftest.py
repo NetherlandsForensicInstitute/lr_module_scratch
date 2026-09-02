@@ -23,4 +23,4 @@ def model_folder(request) -> Path:
 
     # Generate models at import time so that TEST_FOLDER is populated before @pytest.mark.parametrize
     # evaluates its argument list during collection.
-    return get_validation_experiment(request.param, Path("data") / f"{request.param}.csv", output_path)
+    return get_validation_experiment(request.param, Path("data") / "2023" / f"{request.param}.csv", output_path)
