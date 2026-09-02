@@ -55,24 +55,32 @@ RELEVANT_MARKS = {
     },
 }
 
-FRONT_COLS = ['Type1', 'Type2',]
-END_COLS = ['Matching Cells','Total Cells','Score']
+FRONT_COLS = [
+    "Type1",
+    "Type2",
+]
+END_COLS = ["Matching Cells", "Total Cells", "Score"]
+
 
 def get_weapon_id(cartridge_id: str) -> str:
     """Get the weapon ID from the cartridge string."""
     return "/".join(cartridge_id.split("/")[:-1])
 
+
 def get_weapon_type(cartridge_id: str) -> str:
     """Get the weapon type from the cartridge string."""
     return cartridge_id.split("/")[1]
+
 
 def hash_weapon_id(weapon_id: str) -> str:
     """Hash the weapon ID to anonymize it. Limit it to 10 characters for brevity."""
     return hashlib.sha256(weapon_id.encode()).hexdigest()[:10]
 
+
 def hash_weapon_type(weapon_type: str) -> str:
     """Hash the weapon type to anonymize it. Limit it to 4 characters for brevity."""
     return hashlib.sha256(weapon_type.encode()).hexdigest()[:4]
+
 
 if __name__ == "__main__":
     base_path = Path(os.path.dirname(os.path.abspath(__file__)))
@@ -80,11 +88,11 @@ if __name__ == "__main__":
     disk_path = config.data_from_disk_path
 
     for mark_name, mark_data in RELEVANT_MARKS.items():
-        output_file = mark_data["output_file"]
+        output_file_name = mark_data["output_file"]
         headers = mark_data["headers"]
 
-        output_file = Path(__file__).parent.parent / "data" / "2026" / f"{output_file}"
-        debug_output_file = Path(__file__).parent.parent / "data" / "2026" / f"debug_{output_file}"
+        output_file = Path(__file__).parent.parent / "data" / "2026" / f"{output_file_name}"
+        debug_output_file = Path(__file__).parent.parent / "data" / "2026" / f"debug_{output_file_name}"
 
         mark_df = pd.DataFrame()
 
@@ -107,8 +115,8 @@ if __name__ == "__main__":
         mark_df["UnhashedType1"] = mark_df["Weapon1"].apply(get_weapon_type)
         mark_df["UnhashedType2"] = mark_df["Weapon2"].apply(get_weapon_type)
 
-        mark_df['UnhashedWeapon1'] = mark_df['Weapon1'].apply(get_weapon_id)
-        mark_df['UnhashedWeapon2'] = mark_df['Weapon2'].apply(get_weapon_id)
+        mark_df["UnhashedWeapon1"] = mark_df["Weapon1"].apply(get_weapon_id)
+        mark_df["UnhashedWeapon2"] = mark_df["Weapon2"].apply(get_weapon_id)
 
         mark_df.to_csv(debug_output_file, index=False)
 
@@ -118,6 +126,8 @@ if __name__ == "__main__":
         mark_df["Weapon1"] = mark_df["UnhashedWeapon1"].apply(hash_weapon_id)
         mark_df["Weapon2"] = mark_df["UnhashedWeapon2"].apply(hash_weapon_id)
 
+        mark_df = mark_df.drop(columns=["UnhashedType1", "UnhashedType2", "UnhashedWeapon1", "UnhashedWeapon2"])
+
         # Ensure the FRONT_COLS are at the front and END_COLS are at the end, with the rest of the columns in between.
         # It could be that some of the FRONT_COLS or END_COLS are not present in the DataFrame, so we filter them first.
         front_cols = [col for col in FRONT_COLS if col in mark_df.columns]
@@ -125,5 +135,5 @@ if __name__ == "__main__":
         middle_cols = [col for col in mark_df.columns if col not in front_cols + end_cols]
 
         mark_df = mark_df[front_cols + middle_cols + end_cols]
- 
+
         mark_df.to_csv(output_file, index=False)
