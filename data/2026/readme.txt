@@ -7,12 +7,12 @@ The files are
 - firing_pin_impression.csv
 
 All files contain the following columns:
-- Weapon1: Hash of the path of the first weapon marks folder, limited to 10 characters.
-- Weapon2: Hash of the path of the second weapon marks folder, limited to 10 characters.
-- Material1: Material of the first weapon mark, most often 'nickel' or 'brass'.
+- Weapon1: Hash of the path of the first weapon marks folder. Hash is limited to 10 characters.
+- Weapon2: Hash of the path of the second weapon marks folder. Hash is  limited to 10 characters.
+- Material1: Material of the first weapon mark, most often 'Nickel' or 'Brass'.
 - Material2: Material of the second weapon mark, most often 'nickel' or 'brass'.
-- Hypothesis: Either 0 (not from the same weapon) or 1 (from the same weapon).
-- Type1: Hash of the weapon type, limited to 4 characters. 
+- Hypothesis: Either 0 (from different weapons) or 1 (from the same weapon).  
+- Type1: Hash of the weapon type. Hash is limited to 4 characters.
 - Type2: Hash of the weapon type, limited to 4 characters.
 
 The impression csv files also contain the following columns:
@@ -29,6 +29,8 @@ Note that each comparison between A and B is made twice, as (A,B) an (B,A) are s
 aperture_shear.csv:
 - Type 125b: 161 weapons, 6078 mark comparisons (H1=318, H0=5760)
 - Type fcc2: 7 weapons, 546 mark comparisons (H1=14, H0=532)
+Total: 168 weapons, 6624 mark comparisons (H1=332, H0=6292)
+Not every weapon type has shear marks, so the shear csv file contains fewer weapon types than the impression csv files.
 
 breech_face_impression.csv:
 - Type 125b: 186 weapons, 16296 mark comparisons (H1=372, H0=15924)
@@ -36,6 +38,7 @@ breech_face_impression.csv:
 - Type 85b3: 93 weapons, 10940 mark comparisons (H1=186, H0=10754)
 - Type fc09: 38 weapons, 10830 mark comparisons (H1=76, H0=10754)
 - Type fcc2: 9 weapons, 2826 mark comparisons (H1=18, H0=2808)
+Total: 411 weapons, 51816 mark comparisons (H1=822, H0=50994)
 
 firing_pin_impression.csv:
 - Type 125b: 186 weapons, 19108 mark comparisons (H1=372, H0=18736)
@@ -44,4 +47,4 @@ firing_pin_impression.csv:
 - Type b844: 37 weapons, 13320 mark comparisons (H1=74, H0=13246)
 - Type fc09: 38 weapons, 13642 mark comparisons (H1=76, H0=13566)
 - Type fcc2: 9 weapons, 3492 mark comparisons (H1=18, H0=3474)
-     
+Total: 448 weapons, 77050 mark comparisons (H1=896, H0=76154)

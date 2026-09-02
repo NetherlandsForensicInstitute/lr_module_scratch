@@ -55,6 +55,13 @@ RELEVANT_MARKS = {
     },
 }
 
+COL_ORDER = ['Type1', 
+             'Type2', 
+             'Weapon1',
+               'Weapon2',
+                 'Material1'
+                 , 'Material2', 'Hypothesis',
+             '',]
 
 def get_and_hash_weapon_id(cartridge_id: str) -> str:
     """Get the weapon ID from the cartridge string and hash it to anonymize it."""
@@ -81,8 +88,8 @@ if __name__ == "__main__":
 
         mark_df = pd.DataFrame()
 
-        for input_file_bas in RELEVANT_INPUT_FILES:
-            input_file = f"{disk_path}/{input_file_bas}_{mark}.csv"
+        for base_input_filename in RELEVANT_INPUT_FILES:
+            input_file = f"{disk_path}/{base_input_filename}_{mark}.csv"
             df = pd.read_csv(input_file, header=0, skiprows=0, names=headers, dtype=str)
 
             # If the first row has the same values as the headers, drop it
