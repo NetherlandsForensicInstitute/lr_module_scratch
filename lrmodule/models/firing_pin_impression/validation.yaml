@@ -1,5 +1,5 @@
 output_path: output/${timestamp}_firing_pin_impression
-input_file_path: data/firing_pin_impression.csv
+input_file_path: data/2023/firing_pin_impression.csv
 
 lrsystem: &lrsystem
   architecture: lrmodule.binary_lrsystem
@@ -65,3 +65,4 @@ experiments:
       - ece
       - llr_interval
       - save_model
+      - lrmodule.plot_mcmc.MCMCParameterPlot
