@@ -38,7 +38,7 @@ class MCMCParameterPlot(Aggregation):
 
                 try:
                     x, y = FFTKDE(bw="silverman").fit(parameter_values).evaluate(2 ** 10)
-                    ax.plot(x, y,)
+                    ax.plot(x, y)
                     ax.set_xlabel(parameter_name)
                     ax.set_ylabel('probability density')
                 except ValueError as e:
