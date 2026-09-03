@@ -1,5 +1,5 @@
 output_path: output/${timestamp}_firing_pin_impression
-input_file_path: data/firing_pin_impression.csv
+input_file_path: data/2023/firing_pin_impression.csv
 
 lrsystem: &lrsystem
   architecture: lrmodule.binary_lrsystem
@@ -7,7 +7,7 @@ lrsystem: &lrsystem
     steps:
       validate_data: validate_feature_data_type
       mcmc:
-        method: mcmc
+        method: lrmodule.new_mcmc.McmcLLRModel
         # parameters copied from MCMC test
         distribution_h1: betabinomial
         parameters_h1:
@@ -65,3 +65,4 @@ experiments:
       - ece
       - llr_interval
       - save_model
+      - lrmodule.new_mcmc.MCMCParameterPlot
