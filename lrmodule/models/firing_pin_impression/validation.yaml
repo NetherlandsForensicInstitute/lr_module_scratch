@@ -65,4 +65,4 @@ experiments:
       - ece
       - llr_interval
       - save_model
-      - lrmodule.new_mcmc.MCMCParameterPlot
+      - lrmodule.plot_mcmc.MCMCParameterPlot
