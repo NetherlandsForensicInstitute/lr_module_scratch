@@ -7,7 +7,7 @@ lrsystem: &lrsystem
     steps:
       validate_data: validate_feature_data_type
       mcmc:
-        method: lrmodule.new_mcmc.McmcLLRModel
+        method: mcmc
         # parameters copied from MCMC test
         distribution_h1: betabinomial
         parameters_h1:
