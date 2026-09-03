@@ -1,8 +1,8 @@
 import logging
-from matplotlib import pyplot as plt
 
+from KDEpy import FFTKDE
 from lir.aggregation import Aggregation, AggregationData
-
+from matplotlib import pyplot as plt
 
 LOG = logging.getLogger(__name__)
 
@@ -20,7 +20,6 @@ class MCMCParameterPlot(Aggregation):
         data : AggregationData
             The aggregated data to be plotted.
         """
-
         run_name = data.run_name
         lrsystem = data.get_full_fit_lrsystem()
 
@@ -38,7 +37,8 @@ class MCMCParameterPlot(Aggregation):
                 fig, ax = plt.subplots()
 
                 try:
-                    ax.hist(parameter_values, density=True)
+                    x, y = FFTKDE(bw="silverman").fit(parameter_values).evaluate(2 ** 10)
+                    ax.plot(x, y,)
                     ax.set_xlabel(parameter_name)
                     ax.set_ylabel('probability density')
                 except ValueError as e:
