@@ -13,7 +13,7 @@ def test_input_data_to_instances():
     # Arrange
     input_file = Path(__file__).parent / "fixtures/input_data/train_test_data.csv"
     dataset = FeatureDataCsvParser(
-        open_file_fn=lambda: open(input_file),
+        input_file,
         hypothesis_column="hypothesis",
         source_id_column=["weapon1", "weapon2"],
         extra_fields=[
