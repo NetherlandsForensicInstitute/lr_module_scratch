@@ -14,7 +14,7 @@ license = {text = "Apache Software License 2.0"}
 
 lir = {url = "https://github.com/NetherlandsForensicInstitute/lir", rev = "335f8e0dc458b3d969b1a126e492c04cbf8499ab" }
 dependencies = [
-    "lir==1.7.1",
+    "lir @ git+https://github.com/NetherlandsForensicInstitute/lir@main",
     "pandas",
     "pytest-randomly",
 ]

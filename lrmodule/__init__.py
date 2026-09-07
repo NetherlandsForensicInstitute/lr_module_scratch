@@ -6,7 +6,7 @@ import confidence
 from lir.config.lrsystem_architectures import specific_source
 from lir.data.models import FeatureData
 from lir.datasets.feature_data_csv import FeatureDataCsvParser
-from lir.lrsystems.lrsystems import LRSystem
+from lir.lrsystems import LRSystem
 from lir.main import initialize_experiments
 
 __all__ = [
@@ -56,9 +56,7 @@ def get_reference_data(lr_system_folder: Path, file_name: str = "reference_data.
     attribute, which can be used to access the feature values and the labels, respectively.
     """
     reference_data_file = lr_system_folder / file_name
-    return FeatureDataCsvParser(
-        open_file_fn=lambda: open(reference_data_file), label_column="hypothesis"
-    ).get_instances()
+    return FeatureDataCsvParser(reference_data_file, hypothesis_column="hypothesis").get_instances()
 
 
 def get_validation_experiment(model_name: str, training_data_path: Path, output_path: Path) -> Path:
