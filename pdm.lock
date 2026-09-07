@@ -4,8 +4,8 @@
 [metadata]
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
-lock_version = "4.5.0"
-content_hash = "sha256:ccb6db836459b1e50723d432489d53fec907c795e1ba760ce2364854e6cb2585"
+lock_version = "4.5.1"
+content_hash = "sha256:34f74ff5ca2af91b22ee7bb7d8ead26ecc7103a4895960a2400fd7e145f3df4e"
 
 [[metadata.targets]]
 requires_python = ">=3.13,<3.14"
@@ -522,8 +522,11 @@ files = [
 
 [[package]]
 name = "lir"
-version = "1.7.1"
+version = "1.7.2.dev23"
 requires_python = "<3.15,>=3.12"
+git = "https://github.com/NetherlandsForensicInstitute/lir"
+ref = "main"
+revision = "dd47feb908389ca643413bf26fccd1c8bc55ee72"
 summary = "Package for optimising and evaluating Likelihood Ratio (LR) systems."
 groups = ["default"]
 dependencies = [
@@ -540,9 +543,6 @@ dependencies = [
     "scikit-learn>=1.2",
     "scipy>=1.13.1",
     "tqdm>=4.67.1",
-]
-files = [
-    {file = "lir-1.7.1-py3-none-any.whl", hash = "sha256:0a2463acae10bddec57f6eee66c3b41c42d3fa08bc2cff1f8660b0c1283d9a96"},
 ]
 
 [[package]]
@@ -1324,7 +1324,7 @@ version = "2026.3"
 requires_python = ">=2"
 summary = "Provider of IANA time zone data"
 groups = ["default"]
-marker = "sys_platform == \"win32\" or sys_platform == \"emscripten\""
+marker = "sys_platform == \"emscripten\" or sys_platform == \"win32\""
 files = [
     {file = "tzdata-2026.3-py2.py3-none-any.whl", hash = "sha256:dc096730c87af6cab1b171c9d532be840741ff5d459015e7f6947bd7d7e54931"},
     {file = "tzdata-2026.3.tar.gz", hash = "sha256:4a1518b8993086a7982523e071643f3c0e5f213e75b21318e78bcabfff9d1415"},

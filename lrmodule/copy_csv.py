@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 from lir.aggregation import Aggregation
-from lir.config.base import ContextAwareDict, config_parser, pop_field
+from lir.config.base import ConfigValue, config_parser, pop_field
 from lir.data.io import search_path
 from lir.util import check_type
 
@@ -52,9 +52,9 @@ class CopyCSV(Aggregation):
 
 
 @config_parser()
-def copy_csv(config: ContextAwareDict, output_dir: str) -> CopyCSV:
+def copy_csv(config: ConfigValue, output_dir: str) -> CopyCSV:
     """Parse the configuration for the CopyCSV aggregation and return an instance of it."""
-    source_file = pop_field(config, "file")
+    source_file = pop_field(config, "file", validate_type=str)
     columns = pop_field(config, "columns", default=[], validate=partial(check_type, list))
-    new_file_name = pop_field(config, "new_file_name", required=False)
+    new_file_name = pop_field(config, "new_file_name", required=False, validate_type=str)
     return CopyCSV(source_file, output_dir, columns=columns, new_file_name=new_file_name)
