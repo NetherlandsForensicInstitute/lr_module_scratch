@@ -2,10 +2,11 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from lir.config.base import ConfigValue
 from lir.data.models import FeatureData
 from numpy import array
 
-from lrmodule.content_filter import ContentFilter, _ConditionBuilder
+from lrmodule.content_filter import ContentFilter, _ConditionBuilder, parse_content_filter
 
 
 def test_equals_filter():
@@ -234,8 +235,15 @@ def test_complex_nested_condition():
     result = content_filter.apply(instances)
 
     # Assert
-    assert len(result) == 3
-    assert np.all(result.features == array([[1.0, 2.0], [3.0, 4.0], [9.0, 10.0]]))
+    expected_result = array([[1.0, 2.0], [3.0, 4.0], [9.0, 10.0]])
+    assert len(result) == expected_result.shape[0]
+    assert np.all(result.features == expected_result)
+
+    # Act again
+    result = parse_content_filter().parse(ConfigValue.wrap([], {'condition': condition}), Path('/')).apply(instances)
+    assert len(result) == expected_result.shape[0]
+    assert np.all(result.features == expected_result)
+
 
 
 def test_filter_preserves_all_fields():
