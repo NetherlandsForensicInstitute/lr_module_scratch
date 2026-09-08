@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 from lir import Transformer
-from lir.config.base import ContextAwareDict, pop_field
+from lir.config.base import pop_field, check_is_empty, config_parser, ConfigValue
 from lir.data.models import InstanceData
 
 LOG = logging.getLogger(__name__)
@@ -207,8 +207,10 @@ class _ConditionBuilder:
         return condition_builders[condition_type](condition_spec)
 
 
-def parse_content_filter(config: ContextAwareDict, _: Path) -> ContentFilter:
+@config_parser
+def parse_content_filter(config: ConfigValue, _: Path) -> ContentFilter:
     """Parse ContentFilter configuration."""
-    condition_spec = pop_field(config, "condition", validate=lambda x: isinstance(x, dict))
+    condition_spec = pop_field(config, "condition", validate_type=dict)
+    check_is_empty(config)
     filter_fn = _ConditionBuilder.build_condition(condition_spec)
     return ContentFilter(filter_fn)
