@@ -7,7 +7,8 @@ lrsystem: &firing_pin_cmc_lrsystem
     steps:
       validate_data: validate_feature_data_type
       mcmc:
-        method: lrmodule.plot_mcmc.McmcLLRModel
+        method: lrmodule.plot_mcmc.parse_mcmc_llr_model_config
+        include_parameter_plots: True
         # parameters copied from MCMC test
         distribution_h1: betabinomial
         parameters_h1:
@@ -65,4 +66,4 @@ experiments:
       - ece
       - llr_interval
       - save_model
-      - lrmodule.plot_mcmc.MCMCParameterPlot
+      - lrmodule.plot_mcmc.FullFitLRSystem

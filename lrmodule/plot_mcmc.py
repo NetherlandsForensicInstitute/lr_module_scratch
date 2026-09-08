@@ -1,5 +1,7 @@
 import logging
+import os
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any, Self
 
 import numpy as np
@@ -8,9 +10,9 @@ from lir.aggregation import Aggregation, AggregationData
 from lir.algorithms.bayeserror import ELUBBounder
 from lir.algorithms.mcmc import McmcModel
 from lir.bounding import LLRBounder, check_type
+from lir.config.base import ConfigValue, config_parser
 from lir.data.models import FeatureData, InstanceData, LLRData
 from lir.transform import Transformer
-from lir.util import check_not_none
 from matplotlib import pyplot as plt
 
 LOG = logging.getLogger(__name__)
@@ -45,7 +47,7 @@ class McmcLLRModel(Transformer):
         Additional MCMC simulation settings passed to `McmcModel`.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913, PLR0917
         self,
         distribution_h1: str,
         parameters_h1: dict[str, dict[str, float | int | str]] | None,
@@ -53,6 +55,8 @@ class McmcLLRModel(Transformer):
         parameters_h2: dict[str, dict[str, float | int | str]] | None,
         bounding: Callable[[], LLRBounder] | None = elub_bounder_factory,
         interval: tuple[float, float] = (0.05, 0.95),
+        include_parameter_plots: bool = False,
+        plot_path: Path | None = None,
         **mcmc_kwargs: Any,
     ):
         self.model_h1 = McmcModel(distribution_h1, parameters_h1, **mcmc_kwargs)
@@ -60,6 +64,9 @@ class McmcLLRModel(Transformer):
         self.bounder_factory = bounding
         self.bounders: list[LLRBounder] | None = None
         self.interval = interval
+        self.include_parameter_plots = include_parameter_plots
+        self.plot_path = plot_path
+        self.plot_count = 0
 
     def fit(self, instances: InstanceData) -> Self:
         """
@@ -79,6 +86,32 @@ class McmcLLRModel(Transformer):
 
         self.model_h1.fit(instances.features[instances.require_labels == 1])
         self.model_h2.fit(instances.features[instances.require_labels == 0])
+
+        # optionally, plot distributions of the sampled distribution parameters
+        if self.include_parameter_plots and self.plot_path is not None:
+            self.plot_count += 1
+            hypothesis_models = {"h1": self.model_h1, "h2": self.model_h2}
+            for hypothesis, model in hypothesis_models.items():
+                for parameter_name, parameter_values in model.parameter_samples.items():
+                    plot_name = "distribution-" + hypothesis + "_" + model.distribution + "_" + parameter_name
+                    fig, ax = plt.subplots()
+
+                    try:
+                        x, y = FFTKDE(bw="silverman").fit(parameter_values).evaluate(2**10)
+                        ax.plot(x, y)
+                        ax.set_xlabel(parameter_name)
+                        ax.set_ylabel("probability density")
+                    except ValueError as e:
+                        LOG.warning(f"Could not generate plot {plot_name}: {e}")
+                        continue
+
+                    file_name = self.plot_path / f"{self.plot_count:02d}-{plot_name}.png"
+
+                    LOG.info(f"Saving plot {plot_name} to {file_name}")
+                    fig.savefig(file_name)
+
+                    plt.close(fig)
+
         if self.bounder_factory is not None:
             # determine the bounds based on the LLRs of the training data, each sample results into an LR-system
             logp_h1 = self.model_h1.transform(instances.features)
@@ -117,65 +150,27 @@ class McmcLLRModel(Transformer):
                 bound_llr_data = self.bounders[i_system].apply(llr_data)
                 llrs[:, i_system] = bound_llr_data.llrs
         quantiles = np.quantile(llrs, [0.5] + list(self.interval), axis=1, method="midpoint")
-        mcmc_details = {
-            "mcmc_distribution_h1": self.model_h1.distribution,
-            "mcmc_parameters_h1": self.model_h1.parameter_samples,
-            "mcmc_distribution_h2": self.model_h2.distribution,
-            "mcmc_parameters_h2": self.model_h2.parameter_samples,
-        }
-        # llr_data = instances.replace_as(LLRData, features=quantiles.transpose(1, 0), mcmc_details=mcmc_details)
-        # llr_data = instances.replace_as(LLRData, features=quantiles.transpose(1, 0))
-        # llr_data = llr_data.replace(**mcmc_details)
-        return instances.replace_as(LLRData, features=quantiles.transpose(1, 0), **mcmc_details)
+        return instances.replace_as(LLRData, features=quantiles.transpose(1, 0))
 
 
-class MCMCParameterPlot(Aggregation):
-    # Based on PlotEach and CaseLLRToCsv
+@config_parser
+def parse_mcmc_llr_model_config(config: ConfigValue, output_dir: Path) -> McmcLLRModel:
+    """Add output folder if parameter plots are requested."""
+    config_dict = config.as_dict()
+    if "include_parameter_plots" in config_dict and config_dict["include_parameter_plots"]:
+        folder_name = "mcmc_output"
+        mcmc_folders = [f.name for f in os.scandir(output_dir) if f.is_dir() and f.name.startswith(folder_name)]
+        plot_path = output_dir / f"{folder_name}-{len(mcmc_folders) + 1:02d}"
+        plot_path.mkdir(parents=True, exist_ok=True)
+    else:
+        plot_path = None
+    return McmcLLRModel(**config_dict, plot_path=plot_path)
 
+
+class FullFitLRSystem(Aggregation):
     def report(self, data: AggregationData) -> None:
-        """
-        Plot the data when new results are available.
-
-        Parameters
-        ----------
-        data : AggregationData
-            The aggregated data to be plotted.
-        """
-        run_name = data.run_name
-
+        """Fit the LR-system on all available data."""
         if data.get_full_fit_lrsystem is not None:
-            lrsystem = data.get_full_fit_lrsystem()
+            data.get_full_fit_lrsystem()
         else:
-            LOG.warning(
-                f"No full-data-fitted model factory available for run `{data.run_name}`; "
-                f"using split-trained model instead."
-            )
-            lrsystem = check_not_none(data.lrsystem)
-
-        mcmc_system = [x[1] for x in lrsystem.config.modules.steps if x[0] == "mcmc"]
-        if not mcmc_system:
-            raise ValueError("expected an `mcmc` step in the lrsystem pipeline, but found none.")
-        else:
-            mcmc_system = mcmc_system[0]
-
-        hypothesis_models = {"h1": mcmc_system.model_h1, "h2": mcmc_system.model_h2}
-        for hypothesis, model in hypothesis_models.items():
-            for parameter_name, parameter_values in model.parameter_samples.items():
-                plot_name = "MCMC_parameter-" + hypothesis + "_" + model.distribution + "_" + parameter_name
-                fig, ax = plt.subplots()
-
-                try:
-                    x, y = FFTKDE(bw="silverman").fit(parameter_values).evaluate(2**10)
-                    ax.plot(x, y)
-                    ax.set_xlabel(parameter_name)
-                    ax.set_ylabel("probability density")
-                except ValueError as e:
-                    LOG.warning(f"Could not generate plot {plot_name} for run `{run_name}`: {e}")
-                    return
-
-                file_name = data.resolve_path_for_run(f"{plot_name}.png")
-
-                LOG.info(f"Saving plot {plot_name} for run `{run_name}` to {file_name}")
-                fig.savefig(file_name)
-
-                plt.close(fig)
+            LOG.warning(f"No full-data-fitted model factory available for run `{data.run_name}`.")
