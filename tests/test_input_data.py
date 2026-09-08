@@ -1,11 +1,12 @@
 from pathlib import Path
 
 import numpy as np
-from lir.data.models import FeatureData
+import pytest
+from lir.data.models import FeatureData, PairedFeatureData
 from lir.datasets.feature_data_csv import ExtraField, FeatureDataCsvParser
 from numpy import array
 
-from lrmodule.input_data import PredefinedCrossValidation
+from lrmodule.input_data import CrossValidationPairs, PredefinedCrossValidation
 
 
 def test_input_data_to_instances():
@@ -59,3 +60,80 @@ def test_input_data_to_instances():
     ):
         assert FeatureData(features=actual_train.features, hypothesis=actual_train.hypothesis) == expected_train
         assert FeatureData(features=actual_test.features, hypothesis=actual_test.hypothesis) == expected_test
+
+
+def test_cross_validation_pairs():
+    """Check that CrossValidationPairs correctly splits paired data into k folds."""
+    # Arrange
+    source_ids = array([
+        [0, 0],
+        [1, 1],
+        [2, 2],
+        [3, 3],
+        [4, 4],
+        [5, 5],
+        [0, 3],
+        [1, 4],
+        [2, 5],
+        [0, 4],
+        [1, 5],
+        [2, 3],
+    ])
+    labels = array([1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0])
+    features = np.arange(24).reshape(12, 2).astype(float)
+    data = FeatureData(features=features, hypothesis=labels, source_ids=source_ids)
+    strategy = CrossValidationPairs(folds=3, random_state=42)
+
+    # Act
+    splits = list(strategy.apply(data))
+
+    # Assert: correct number of folds
+    assert len(splits) == 3  # noqa: PLR2004
+
+    for train, test in splits:
+        # No source overlap between train and test
+        assert train.source_ids is not None
+        assert test.source_ids is not None
+
+        train_sources = set(train.source_ids.flatten())
+        test_sources = set(test.source_ids.flatten())
+        assert train_sources & test_sources == set(), "sources should not overlap between train and test"
+        assert train_sources | test_sources == set(source_ids.flatten()), "union of train and test should be the full set"
+
+        # All pairs in train have both sources in training set
+        for pair in train.source_ids:
+            assert pair[0] in train_sources
+            assert pair[1] in train_sources
+
+        # All pairs in test have both sources in test set
+        for pair in test.source_ids:
+            assert pair[0] in test_sources
+            assert pair[1] in test_sources
+
+
+def test_pair_count():
+    # generate 10 x 10 = 100 pairs
+    source_ids = np.array(np.meshgrid(np.arange(10), np.arange(10))).T.reshape(-1, 2)
+    labels = source_ids[:,0] == source_ids[:,1]
+    features = np.arange(200).reshape(100, 2, 1).astype(float)
+    data = PairedFeatureData(features=features, hypothesis=labels, source_ids=source_ids, n_trace_instances=1, n_ref_instances=1)
+    strategy = CrossValidationPairs(folds=5, random_state=42)
+    for train, test in strategy.apply(data):
+        assert len(train) == 64
+        assert len(test) == 4
+        assert len(train[train.hypothesis==1]) == 8
+        assert len(test[test.hypothesis==1]) == 2
+        assert len(train[train.hypothesis==0]) == 8*7
+        assert len(test[test.hypothesis==0]) == 2
+
+
+def test_cross_validation_pairs_invalid_source_ids():
+    """Check that CrossValidationPairs raises an exception for invalid source_ids shapes."""
+    features = np.arange(12).reshape(6, 2).astype(float)
+    labels = array([1, 1, 0, 0, 0, 0])
+    strategy = CrossValidationPairs(folds=3, random_state=42)
+
+    source_ids_1col = array([[0], [1], [2], [3], [4], [5]])
+    data_1col = FeatureData(features=features, hypothesis=labels, source_ids=source_ids_1col)
+    with pytest.raises(ValueError, match="expected two-column source_ids"):
+        list(strategy.apply(data_1col))

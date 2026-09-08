@@ -1,0 +1,67 @@
+output_path: output/${timestamp}_firing_pin_impression_cv
+input_file_path: data/firing_pin_impression.csv
+
+lrsystem: &lrsystem
+  architecture: lrmodule.binary_lrsystem
+  modules:
+    steps:
+      validate_data: validate_feature_data_type
+      mcmc:
+        method: mcmc
+        distribution_h1: betabinomial
+        parameters_h1:
+          alpha:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+          beta:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+        distribution_h2: binomial
+        parameters_h2:
+          p:
+            prior: beta
+            alpha: 0.5
+            beta: 0.5
+        interval:
+          - 0.05
+          - 0.95
+      elub: elub_bounder
+
+experiments:
+  - name: crossvalidation_comparison
+    strategy: grid
+    lrsystem: *lrsystem
+    data:
+      provider:
+        method: parse_features_from_csv_file
+        file: ${input_file_path}
+        label_column: hypothesis
+        source_id_column:
+          - weapon1
+          - weapon2
+        extra_fields:
+          - split1
+          - split2
+          - split3
+        ignore_columns:
+          - accf
+      splits:
+        strategy: lrmodule.input_data.PredefinedCrossValidation
+    data_parameters:
+      - path: splits
+        options:
+          - option_name: predefined
+            value:
+              strategy: lrmodule.input_data.PredefinedCrossValidation
+          - option_name: pairs
+            value:
+              strategy: lrmodule.input_data.CrossValidationPairs
+              folds: 3
+              random_state: 0
+    output:
+      - metrics
+      - pav
+      - ece
+      - llr_interval
