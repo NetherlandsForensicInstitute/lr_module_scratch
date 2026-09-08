@@ -35,9 +35,14 @@ class ContentFilter(Transformer):
           filter:
             method: lrmodule.content_filter.parse_content_filter
             condition:
-              type: equals
-              column: weapon1
-              value: "1"
+              type: or
+              conditions:
+                - type: equals
+                  column: weapon1
+                  value: "1"
+                - type: equals
+                  column: weapon2
+                  value: "1"
 
     Or to filter for matching weapon types:
 
