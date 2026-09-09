@@ -45,6 +45,12 @@ experiments:
         columns:
           - cllr
           - cllr_min
+      - method: lrmodule.copy_csv.copy_csv
+        file: ${input_file_path}
+        new_file_name: reference_data.csv
+        columns:
+          - hypothesis
+          - ccf
       - pav
       - ece
       - llr_interval
