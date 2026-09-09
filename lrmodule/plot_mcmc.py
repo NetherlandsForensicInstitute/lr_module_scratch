@@ -1,16 +1,14 @@
 import logging
-import os
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Self
 
 import numpy as np
 from KDEpy import FFTKDE
-from lir.aggregation import Aggregation, AggregationData
 from lir.algorithms.bayeserror import ELUBBounder
 from lir.algorithms.mcmc import McmcModel
 from lir.bounding import LLRBounder, check_type
-from lir.config.base import ConfigValue, config_parser
+from lir.config.base import ConfigValue, config_parser, pop_field
 from lir.data.models import FeatureData, InstanceData, LLRData
 from lir.transform import Transformer
 from matplotlib import pyplot as plt
@@ -55,7 +53,6 @@ class McmcLLRModel(Transformer):
         parameters_h2: dict[str, dict[str, float | int | str]] | None,
         bounding: Callable[[], LLRBounder] | None = elub_bounder_factory,
         interval: tuple[float, float] = (0.05, 0.95),
-        include_parameter_plots: bool = False,
         plot_path: Path | None = None,
         **mcmc_kwargs: Any,
     ):
@@ -64,7 +61,6 @@ class McmcLLRModel(Transformer):
         self.bounder_factory = bounding
         self.bounders: list[LLRBounder] | None = None
         self.interval = interval
-        self.include_parameter_plots = include_parameter_plots
         self.plot_path = plot_path
         self.plot_count = 0
 
@@ -88,7 +84,8 @@ class McmcLLRModel(Transformer):
         self.model_h2.fit(instances.features[instances.require_labels == 0])
 
         # optionally, plot distributions of the sampled distribution parameters
-        if self.include_parameter_plots and self.plot_path is not None:
+        if self.plot_path is not None:
+            self.plot_path.mkdir(parents=True, exist_ok=True)
             self.plot_count += 1
             hypothesis_models = {"h1": self.model_h1, "h2": self.model_h2}
             for hypothesis, model in hypothesis_models.items():
@@ -156,21 +153,6 @@ class McmcLLRModel(Transformer):
 @config_parser
 def parse_mcmc_llr_model_config(config: ConfigValue, output_dir: Path) -> McmcLLRModel:
     """Add output folder if parameter plots are requested."""
-    config_dict = config.as_dict()
-    if "include_parameter_plots" in config_dict and config_dict["include_parameter_plots"]:
-        folder_name = "mcmc_output"
-        mcmc_folders = [f.name for f in os.scandir(output_dir) if f.is_dir() and f.name.startswith(folder_name)]
-        plot_path = output_dir / f"{folder_name}-{len(mcmc_folders) + 1:02d}"
-        plot_path.mkdir(parents=True, exist_ok=True)
-    else:
-        plot_path = None
-    return McmcLLRModel(**config_dict, plot_path=plot_path)
-
-
-class FullFitLRSystem(Aggregation):
-    def report(self, data: AggregationData) -> None:
-        """Fit the LR-system on all available data."""
-        if data.get_full_fit_lrsystem is not None:
-            data.get_full_fit_lrsystem()
-        else:
-            LOG.warning(f"No full-data-fitted model factory available for run `{data.run_name}`.")
+    include_parameter_plots = pop_field(config, "include_parameter_plots", default=False, validate_type=bool)
+    plot_path = output_dir / "mcmc_output" if include_parameter_plots else None
+    return McmcLLRModel(**config.as_dict(), plot_path=plot_path)

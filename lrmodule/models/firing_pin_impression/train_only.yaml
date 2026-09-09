@@ -7,7 +7,8 @@ lrsystem: &firing_pin_cmc_lrsystem
     steps:
       validate_data: validate_feature_data_type
       mcmc:
-        method: mcmc
+        method: lrmodule.plot_mcmc.parse_mcmc_llr_model_config
+        include_parameter_plots: True
         # parameters copied from MCMC test
         distribution_h1: betabinomial
         parameters_h1:
@@ -31,7 +32,7 @@ lrsystem: &firing_pin_cmc_lrsystem
       elub: elub_bounder
 
 experiments:
-  - name: model
+  - name: single_run
     strategy: single_run
     lrsystem: *firing_pin_cmc_lrsystem
     data:
@@ -51,17 +52,22 @@ experiments:
       splits:
         strategy: lrmodule.input_data.PredefinedCrossValidation
     output:
-      - method: metrics
-        columns:
-          - cllr
-          - cllr_min
-      - method: lrmodule.copy_csv.copy_csv
-        file: ${input_file_path}
-        new_file_name: reference_data.csv
-        columns:
-          - hypothesis
-          - accf
+      - metrics
       - pav
       - ece
       - llr_interval
-      - save_model
+  - name: train_only
+    strategy: train_only
+    lrsystem: *firing_pin_cmc_lrsystem
+    data_provider:
+      method: parse_features_from_csv_file
+      file: ${input_file_path}
+      hypothesis_column: hypothesis
+      source_id_column:
+        - weapon1
+        - weapon2
+      ignore_columns:
+        - accf
+        - split1
+        - split2
+        - split3
