@@ -21,14 +21,14 @@ All typing, linting and formatting configuration was taken from the Scratch repo
 
 ## Model validation
 
-1. Update hyperparameters, experiment setup and data path as needed in `models/[NAME]/validation.yaml`;
-2. Run validation experiments as `pdm run lir models/[NAME]/validation.yaml`;
+1. Update hyperparameters, experiment setup and data path as needed in `lrmodule/models/[NAME]/validation.yaml`;
+2. Run validation experiments as `pdm run lir lrmodule/models/[NAME]/validation.yaml`;
 3. Inspect the results in the output folder;
 4. When satisfied, update the stored model (TODO).
 
 ## Debugging in PyCharm
 
-For example, instead of `pdm run lir models/[NAME]/validation.yaml`:
+For example, instead of `pdm run lir lrmodule/models/[NAME]/validation.yaml`:
 
 - Create a new 'Run/Debug configuration', with the following settings:
 - Select the 'Python' template/default to start from
