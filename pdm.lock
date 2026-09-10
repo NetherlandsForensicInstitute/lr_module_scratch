@@ -522,11 +522,11 @@ files = [
 
 [[package]]
 name = "lir"
-version = "1.7.2.dev23"
+version = "1.7.2.dev37"
 requires_python = "<3.15,>=3.12"
 git = "https://github.com/NetherlandsForensicInstitute/lir"
 ref = "main"
-revision = "dd47feb908389ca643413bf26fccd1c8bc55ee72"
+revision = "cab3a662319b002c4c79021f64cd383c8ab45b74"
 summary = "Package for optimising and evaluating Likelihood Ratio (LR) systems."
 groups = ["default"]
 dependencies = [
