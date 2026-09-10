@@ -7,8 +7,9 @@ lrsystem: &firing_pin_cmc_lrsystem
     steps:
       validate_data: validate_feature_data_type
       mcmc:
-        method: lrmodule.plot_mcmc.parse_mcmc_llr_model_config
-        include_parameter_plots: True
+        method: mcmc
+        include_plots: True
+        bounding: elub_bounder
         # parameters copied from MCMC test
         distribution_h1: betabinomial
         parameters_h1:
@@ -29,7 +30,6 @@ lrsystem: &firing_pin_cmc_lrsystem
         interval:
           - 0.05
           - 0.95
-      elub: elub_bounder
 
 experiments:
   - name: single_run
