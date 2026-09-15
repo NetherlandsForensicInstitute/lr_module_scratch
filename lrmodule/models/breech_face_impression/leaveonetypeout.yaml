@@ -1,11 +1,10 @@
 # This file contains experiments for comparing the 'generic' vs 'specific' model.
-# The generic models means that the model is trained on all weapon types, and used on all weapon types.
-# The specific model means that the model is trained on one weapon type, and used on that weapon type.
+# The generic models means that the model is trained on all weapon types, and applied on all weapon types.
+# The specific model means that the model is trained on one weapon type, and applied on that weapon type.
 #
 # It is expected that the specific model will perform better than the generic model, since it is trained on more relevant data.
-# However, specific data may not always be available, so it is important to understand the performance of the generic model.
-
-output_path: output/${timestamp}_breech_face_impression_cv
+# However, there may be little or no data available for a specific weapon type, so it is important to understand the performance of the generic model.
+output_path: output/${timestamp}_breech_face_impression_generic_vs_specific
 input_file_path: data/2026/breech_face_impression.csv
 
 filter_equal_types:
@@ -33,6 +32,9 @@ cmc_data_provider:
 lrsystem: &breech_face_cmc_lrsystem
   architecture: lrmodule.binary_lrsystem
   modules:
+    method: logging_pipeline
+    include_fields:
+      - source_ids
     steps:
       validate_data: validate_feature_data_type
       mcmc:
@@ -60,6 +62,7 @@ lrsystem: &breech_face_cmc_lrsystem
 
 experiments:
   - name: train_one_type-test_one_type
+    # SPECIFIC MODEL
     # This experiment trains on one weapon type, and tests on that same type.
     # This is done with 5-fold cross validation, and repeated for each weapon type.
     strategy: grid
@@ -76,7 +79,9 @@ experiments:
               type: equals
               column: Type1
               value:
-
+          write_csv:
+            method: csv_writer
+            path: data_after_filter.csv
       splits:
         strategy: lrmodule.input_data.CrossValidationPairs
         folds: 3
@@ -96,8 +101,10 @@ experiments:
       - pav
       - ece
       - llr_interval
+      - lr_histogram
 
   - name: train_all-test_one_type
+    # GENERIC MODEL - train on all weapon types
     # This exepriment trains on all weapon type, and tests on on one type.
     # This is done with 5-fold cross validation, and repeated for each weapon type.
     strategy: single_run
@@ -118,8 +125,10 @@ experiments:
           - pav
           - ece
           - llr_interval
+          - lr_histogram
 
   - name: train_without_one-test_left_out_type
+    # GENERIC MODEL - drop target weapon from training data.
     # This experiment trains on all but one weapon type, and test on the left out type.
     # This is repeated for each weapon type.
     strategy: single_run
@@ -140,3 +149,4 @@ experiments:
           - pav
           - ece
           - llr_interval
+          - lr_histogram
