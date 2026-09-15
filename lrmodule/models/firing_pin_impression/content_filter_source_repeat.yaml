@@ -59,20 +59,20 @@ data: &firing_pin_data
             - type: equals
               column: Type1
               value: b844
-      source_occurrence_filter:
-        method: lrmodule.content_filter.SourcePairOccurrenceFilter
-        occurrence: 1
+      source_repeat_filter:
+        method: lrmodule.content_filter.SourcePairRepeatFilter
+        repeat: 1
   splits:
     strategy: lrmodule.input_data.CrossValidationPairs
     folds: 3
 
 experiments:
-  - name: b844_source_occurrence
+  - name: b844_source_repeats
     strategy: grid
     lrsystem: *firing_pin_cmc_lrsystem
     data: *firing_pin_data
     data_parameters:
-      - path: filter.steps.source_occurrence_filter.occurrence
+      - path: filter.steps.source_repeat_filter.repeat
         options:
           - 1
           - 2
