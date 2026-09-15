@@ -6,7 +6,7 @@ from lir.config.base import ConfigValue
 from lir.data.models import FeatureData
 from numpy import array
 
-from lrmodule.content_filter import ContentFilter, _ConditionBuilder, parse_content_filter
+from lrmodule.content_filter import ContentFilter, _ConditionBuilder, parse_content_filter, SourcePairOccurrenceFilter
 
 
 def test_equals_filter():
@@ -87,6 +87,25 @@ def test_columns_not_equal_filter():
     assert np.all(result.features == array([[5.0, 6.0], [7.0, 8.0]]))
     assert np.all(getattr(result, "weapon1") == array(["1", "3"]))
     assert np.all(getattr(result, "weapon2") == array(["3", "1"]))
+
+
+def test_source_pair_occurrence_filter():
+    """Test filtering rows where column 1 is greater than or equal to column 2."""
+    # Arrange
+    features = array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0], [7.0, 8.0]])
+    weapon1 = array(["1", "2", "1", "3"])
+    weapon2 = array(["1", "2", "3", "1"])
+    instances = FeatureData(features=features, source_ids=np.column_stack((weapon1,weapon2)))
+
+    content_filter = SourcePairOccurrenceFilter(1)
+
+    # Act
+    result = content_filter.apply(instances)
+
+    # Assert
+    assert len(result) == 3
+    assert np.all(result.features == array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]))
+    assert np.all(getattr(result, "source_ids") == array([["1", "1"], ["2", "2"], ["1", "3"]]))
 
 
 def test_in_list_filter():

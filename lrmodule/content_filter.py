@@ -10,6 +10,38 @@ from lir.data.models import InstanceData
 LOG = logging.getLogger(__name__)
 
 
+class SourcePairOccurrenceFilter(Transformer):
+    """Filter instances based on the occurrence of the source pair in the dataset."""
+
+    def __init__(self, occurrence: int | None):
+        self.occurrence = occurrence
+
+    def apply[DataType: InstanceData](self, instances: DataType) -> DataType:
+        """
+        Apply the content-based filter to a dataset.
+
+        Parameters
+        ----------
+        instances : InstanceData
+            The dataset to filter.
+
+        Returns
+        -------
+        InstanceData
+            A dataset with only the instances that match the filter condition.
+        """
+        if self.occurrence is not None:
+            sorted_source_pairs = np.sort(instances.source_ids, axis=1)
+            merged_source_pairs = sorted_source_pairs[:, 0] + sorted_source_pairs[:, 1]
+            occurrences = np.empty(shape=len(merged_source_pairs), dtype=np.int32)
+            for i_row, source_pair in enumerate(merged_source_pairs):
+                occurrences[i_row] = np.count_nonzero(merged_source_pairs[:i_row,] == source_pair) + 1
+            mask = occurrences == self.occurrence
+            return instances[mask]
+        else:
+            return instances
+
+
 class ContentFilter(Transformer):
     """
     Filter instances based on their content rather than just their indices.
