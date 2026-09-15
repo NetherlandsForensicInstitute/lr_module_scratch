@@ -90,7 +90,7 @@ def test_columns_not_equal_filter():
 
 
 def test_source_pair_occurrence_filter():
-    """Test filtering rows where column 1 is greater than or equal to column 2."""
+    """Test filtering rows for the first occurrence of each source pair."""
     # Arrange
     features = array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0], [7.0, 8.0]])
     weapon1 = array(["1", "2", "1", "3"])
