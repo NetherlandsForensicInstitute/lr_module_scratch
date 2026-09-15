@@ -61,7 +61,15 @@ experiments:
               folds: 3
               random_state: 0
     output:
-      - metrics
+      - method: metrics_csv
+        columns:
+          - cllr
+          - cllr_min
+          - lrmodule.metrics.count
+          - lrmodule.metrics.count_h1
+          - lrmodule.metrics.count_h2
+          - lrmodule.metrics.mean_llr_h1
+          - lrmodule.metrics.mean_llr_h2
       - pav
       - ece
       - llr_interval

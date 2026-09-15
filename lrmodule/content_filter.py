@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 from lir import Transformer
-from lir.config.base import pop_field, check_is_empty, config_parser, ConfigValue
+from lir.config.base import ConfigValue, check_is_empty, config_parser, pop_field
 from lir.data.models import InstanceData
 
 LOG = logging.getLogger(__name__)
