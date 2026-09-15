@@ -7,6 +7,21 @@
 output_path: output/${timestamp}_breech_face_impression_generic_vs_specific
 input_file_path: data/2026/breech_face_impression.csv
 
+outputs:
+  - method: metrics_csv
+    columns:
+      - cllr
+      - cllr_min
+      - lrmodule.metrics.count
+      - lrmodule.metrics.count_h1
+      - lrmodule.metrics.count_h2
+      - lrmodule.metrics.mean_llr_h1
+      - lrmodule.metrics.mean_llr_h2
+  - pav
+  - ece
+  - llr_interval
+  - lr_histogram
+
 filter_equal_types:
   # Filter to only include pairs of the same weapon type
   method: lrmodule.content_filter.parse_content_filter
@@ -39,6 +54,7 @@ lrsystem: &breech_face_cmc_lrsystem
       validate_data: validate_feature_data_type
       mcmc:
         method: mcmc
+        include_plots: True
         distribution_h1: betabinomial
         parameters_h1:
           alpha:
@@ -58,7 +74,7 @@ lrsystem: &breech_face_cmc_lrsystem
         interval:
           - 0.05
           - 0.95
-      elub: elub_bounder
+      bounder: iv_bounder
 
 experiments:
   - name: train_one_type-test_one_type
@@ -96,12 +112,7 @@ experiments:
           - fc09
           - fcc2
 
-    output:
-      - metrics
-      - pav
-      - ece
-      - llr_interval
-      - lr_histogram
+    output: ${outputs}
 
   - name: train_all-test_one_type
     # GENERIC MODEL - train on all weapon types
@@ -120,12 +131,7 @@ experiments:
     output:
       - method: by_category
         category_field: Type1
-        output:
-          - metrics
-          - pav
-          - ece
-          - llr_interval
-          - lr_histogram
+        output: ${outputs}
 
   - name: train_without_one-test_left_out_type
     # GENERIC MODEL - drop target weapon from training data.
@@ -144,9 +150,4 @@ experiments:
     output:
       - method: by_category
         category_field: Type1
-        output:
-          - metrics
-          - pav
-          - ece
-          - llr_interval
-          - lr_histogram
+        output: ${outputs}
