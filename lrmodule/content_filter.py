@@ -10,6 +10,49 @@ from lir.data.models import InstanceData
 LOG = logging.getLogger(__name__)
 
 
+class SourcePairRepeatFilter(Transformer):
+    """
+    Filter instances based on the repeat ID of the source pair in the dataset.
+
+    The first time a source pair is present in a dataset has a repeat ID of 1, the second one has a repeat ID of 2, etc.
+    When filtered on repeat ID = 1, only the first repeats of all source pairs are selected.
+    """
+
+    def __init__(self, repeat: int | None = 1):
+        if repeat is not None and repeat < 1:
+            raise ValueError("`repeat` should be a positive integer.")
+        else:
+            self.repeat = repeat
+
+    def apply[DataType: InstanceData](self, instances: DataType) -> DataType:
+        """
+        Apply the content-based filter to a dataset.
+
+        Parameters
+        ----------
+        instances : InstanceData
+            The dataset to filter.
+
+        Returns
+        -------
+        InstanceData
+            A dataset with only the instances that match the filter condition.
+        """
+        if instances.source_ids is None and self.repeat is not None:
+            raise ValueError("Source IDs are required to filter based on source pairs.")
+
+        if self.repeat is not None and instances.source_ids is not None:
+            sorted_source_pairs = np.sort(instances.source_ids, axis=1)
+            merged_source_pairs = sorted_source_pairs[:, 0] + sorted_source_pairs[:, 1]
+            repeats = np.empty(shape=len(merged_source_pairs), dtype=np.int32)
+            for i_row, source_pair in enumerate(merged_source_pairs):
+                repeats[i_row] = np.count_nonzero(merged_source_pairs[:i_row,] == source_pair) + 1
+            mask = repeats == self.repeat
+            return instances[mask]
+        else:
+            return instances
+
+
 class ContentFilter(Transformer):
     """
     Filter instances based on their content rather than just their indices.

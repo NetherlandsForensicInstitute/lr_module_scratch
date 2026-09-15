@@ -6,7 +6,7 @@ from lir.config.base import ConfigValue
 from lir.data.models import FeatureData
 from numpy import array
 
-from lrmodule.content_filter import ContentFilter, _ConditionBuilder, parse_content_filter
+from lrmodule.content_filter import ContentFilter, _ConditionBuilder, parse_content_filter, SourcePairRepeatFilter
 
 
 def test_equals_filter():
@@ -87,6 +87,30 @@ def test_columns_not_equal_filter():
     assert np.all(result.features == array([[5.0, 6.0], [7.0, 8.0]]))
     assert np.all(getattr(result, "weapon1") == array(["1", "3"]))
     assert np.all(getattr(result, "weapon2") == array(["3", "1"]))
+
+
+def test_source_pair_repeat_filter():
+    """Test filtering rows for the repeat ID of each source pair."""
+    # Arrange
+    features = array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0], [7.0, 8.0], [9.0, 10.0]])
+    weapon1 = array(["1", "2", "1", "3", "1"])
+    weapon2 = array(["1", "2", "3", "1", '3'])
+    instances = FeatureData(features=features, source_ids=np.column_stack((weapon1,weapon2)))
+
+    content_filter_1 = SourcePairRepeatFilter(1)
+    content_filter_2 = SourcePairRepeatFilter(2)
+
+    # Act
+    result_1 = content_filter_1.apply(instances)
+    result_2 = content_filter_2.apply(instances)
+
+    # Assert
+    assert len(result_1) == 3
+    assert np.all(result_1.features == array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]))
+    assert np.all(getattr(result_1, "source_ids") == array([["1", "1"], ["2", "2"], ["1", "3"]]))
+    assert len(result_2) == 1
+    assert np.all(result_2.features == array([[7.0, 8.0]]))
+    assert np.all(getattr(result_2, "source_ids") == array([["3", "1"]]))
 
 
 def test_in_list_filter():
