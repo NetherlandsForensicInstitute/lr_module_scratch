@@ -30,7 +30,7 @@ class SourcePairOccurrenceFilter(Transformer):
         InstanceData
             A dataset with only the instances that match the filter condition.
         """
-        if self.occurrence is not None:
+        if self.occurrence is not None and instances.source_ids is not None:
             sorted_source_pairs = np.sort(instances.source_ids, axis=1)
             merged_source_pairs = sorted_source_pairs[:, 0] + sorted_source_pairs[:, 1]
             occurrences = np.empty(shape=len(merged_source_pairs), dtype=np.int32)
