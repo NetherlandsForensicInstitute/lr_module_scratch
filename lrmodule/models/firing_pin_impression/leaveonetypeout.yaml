@@ -1,23 +1,76 @@
-output_path: output/${timestamp}_firing_pin_impression_cv
+# This file contains experiments for comparing the 'generic' vs 'specific' model.
+# The generic models means that the model is trained on all weapon types, and applied on all weapon types.
+# The specific model means that the model is trained on one weapon type, and applied on that weapon type.
+#
+# It is expected that the specific model will perform better than the generic model, since it is trained on more relevant data.
+# However, there may be little or no data available for a specific weapon type, so it is important to understand the performance of the generic model.
+output_path: output/${timestamp}_firing_pin_impression_generic_vs_specific
 input_file_path: data/2026/firing_pin_impression.csv
+
+outputs:
+  - method: metrics_csv
+    columns:
+      - cllr
+      - cllr_min
+      - lrmodule.metrics.count
+      - lrmodule.metrics.count_h1
+      - lrmodule.metrics.count_h2
+      - lrmodule.metrics.mean_llr_h1
+      - lrmodule.metrics.mean_llr_h2
+  - method: metrics_bars
+    metrics:
+      - cllr
+      - cllr_min
+    plot_params:
+      xlim: (0,1)
+  - pav
+  - ece
+  - llr_interval
+  - lr_histogram
+
+filter_equal_types:
+  # Filter to only include pairs of the same weapon type
+  method: lrmodule.content_filter.parse_content_filter
+  condition:
+    type: columns_equal
+    column1: Type1
+    column2: Type2
+
+cmc_data_provider:
+  method: parse_features_from_csv_file
+  file: ${input_file_path}
+  hypothesis_column: Hypothesis
+  source_id_column:
+    - Weapon1
+    - Weapon2
+  feature_columns:
+    - Matching Cells
+    - Total Cells
+  extra_fields:
+    - Type1
+    - Type2
 
 lrsystem: &firing_pin_cmc_lrsystem
   architecture: lrmodule.binary_lrsystem
   modules:
+    method: logging_pipeline
+    include_fields:
+      - source_ids
     steps:
       validate_data: validate_feature_data_type
       mcmc:
         method: mcmc
+        include_plots: True
         distribution_h1: betabinomial
         parameters_h1:
-            alpha:
-              prior: uniform
-              lower: 0.01
-              upper: 100
-            beta:
-              prior: uniform
-              lower: 0.01
-              upper: 100
+          alpha:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+          beta:
+            prior: uniform
+            lower: 0.01
+            upper: 100
         distribution_h2: binomial
         parameters_h2:
           p:
@@ -27,46 +80,80 @@ lrsystem: &firing_pin_cmc_lrsystem
         interval:
           - 0.05
           - 0.95
-      elub: elub_bounder
-
+      bounder: iv_bounder
 
 experiments:
-  - name: leave_one_type_out
+  - name: train_one_type-test_one_type
+    # SPECIFIC MODEL
+    # This experiment trains on one weapon type, and tests on that same type.
+    # This is done with 5-fold cross validation, and repeated for each weapon type.
+    strategy: grid
+    lrsystem: *firing_pin_cmc_lrsystem
+    data:
+      provider: ${cmc_data_provider}
+      filter:
+        method: pipeline
+        steps:
+          filter_equal_types: ${filter_equal_types}
+          filter_one_type:
+            method: lrmodule.content_filter.parse_content_filter
+            condition:
+              type: equals
+              column: Type1
+              value:
+          write_csv:
+            method: csv_writer
+            path: data_after_filter.csv
+      splits:
+        strategy: lrmodule.input_data.CrossValidationPairs
+        folds: 3
+        random_state: 0
+
+    data_parameters:
+      - path: filter.steps.filter_one_type.condition.value
+        options:
+          - 125b
+          - "2031"
+          - 85b3
+          - fc09
+          - fcc2
+
+    output: ${outputs}
+
+  - name: train_all-test_one_type
+    # GENERIC MODEL - train on all weapon types
+    # This exepriment trains on all weapon type, and tests on on one type.
+    # This is done with 5-fold cross validation, and repeated for each weapon type.
     strategy: single_run
     lrsystem: *firing_pin_cmc_lrsystem
     data:
-      provider:
-        method: parse_features_from_csv_file
-        file: ${input_file_path}
-        hypothesis_column: Hypothesis
-        source_id_column:
-          - Weapon1
-          - Weapon2
-        feature_columns:
-          - Matching Cells
-          - Total Cells
-        extra_fields:
-          - Type1
-          - Type2 
-          
-      filter:
-          method: lrmodule.content_filter.parse_content_filter
-          condition:
-            type: columns_equal
-            column1: Type1
-            column2: Type2
+      provider: ${cmc_data_provider}
+      filter: ${filter_equal_types}
+
+      splits:
+        strategy: lrmodule.input_data.CrossValidationPairs
+        folds: 5
+        random_state: 0
+    output:
+      - method: by_category
+        category_field: Type1
+        output: ${outputs}
+
+  - name: train_without_one-test_left_out_type
+    # GENERIC MODEL - drop target weapon from training data.
+    # This experiment trains on all but one weapon type, and test on the left out type.
+    # This is repeated for each weapon type.
+    strategy: single_run
+    lrsystem: *firing_pin_cmc_lrsystem
+    data:
+      provider: ${cmc_data_provider}
+      filter: ${filter_equal_types}
 
       splits:
         strategy: leave_one_category_out
         category_field: Type1
 
-
     output:
       - method: by_category
         category_field: Type1
-        output:
-        - metrics
-        - pav
-        - ece
-        - llr_interval
-
+        output: ${outputs}
