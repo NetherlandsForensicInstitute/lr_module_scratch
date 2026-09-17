@@ -100,7 +100,6 @@ output: &output_list
       - lrmodule.metrics.mean_llr_h2
   - lr_histogram
   - llr_interval
-  - llr_overestimation
   - ece
 
 experiments:
