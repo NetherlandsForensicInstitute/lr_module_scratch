@@ -83,7 +83,7 @@ firing_pin_cmc_lrsystem: &firing_pin_cmc_lrsystem
         interval:
           - 0.05
           - 0.95
-        draw_count: 100
+        draw_count: 1000
         tune_count: 10000
       bounding: elub_bounder
 
