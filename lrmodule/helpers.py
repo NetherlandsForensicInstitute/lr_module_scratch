@@ -1,4 +1,9 @@
+import logging
+
 import numpy as np
+from lir.aggregation import Aggregation, AggregationData
+
+LOG = logging.getLogger(__name__)
 
 
 def transform_marktype_ccf(original_score):
@@ -32,3 +37,12 @@ def transform_marktype_rel_cmc(original_score: np.ndarray) -> np.ndarray:
     cmc = original_score[:, 0]
     n = original_score[:, 1]
     return cmc / n
+
+
+class FullFitLRSystem(Aggregation):
+    def report(self, data: AggregationData) -> None:
+        """Fit the LR-system on all available data."""
+        if data.get_full_fit_lrsystem is not None:
+            data.get_full_fit_lrsystem()
+        else:
+            LOG.warning(f"No full-data-fitted model factory available for run `{data.run_name}`.")
