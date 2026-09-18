@@ -84,7 +84,7 @@ def test_llr_dataset(dataset_name: str):
     scores_knm = np.array(df_scores[df_scores[0] == "knm"].iloc[:, 1:], dtype=np.int16)
 
     features = np.concatenate([scores_km, scores_knm])
-    labels = np.concatenate([np.ones(scores_km.shape[0]), np.zeros(scores_knm.shape[0])])
+    hypothesis = np.concatenate([np.ones(scores_km.shape[0]), np.zeros(scores_knm.shape[0])])
 
     model = McmcLLRModel(
         cfg.distribution_h1,
@@ -94,7 +94,7 @@ def test_llr_dataset(dataset_name: str):
         bounding=None,
         random_seed=cfg.random_seed,
     )
-    model.fit(FeatureData(features=features, labels=labels))
+    model.fit(FeatureData(features=features, hypothesis=hypothesis))
     llrs = model.apply(FeatureData(features=scores_eval))
     llrs_ref = np.loadtxt(base_directory / (csv_prefix + "-llr_unbound.csv"), delimiter=",")
     assert np.allclose(llrs.llrs, llrs_ref[1], rtol=5e-2, atol=5e-2)
