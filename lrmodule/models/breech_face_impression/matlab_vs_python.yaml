@@ -59,6 +59,9 @@ python_data: &python_data
 breech_face_cmc_lrsystem: &breech_face_cmc_lrsystem
   architecture: lrmodule.binary_lrsystem
   modules:
+    method: logging_pipeline
+    include_fields:
+      - source_ids
     steps:
       validate_data: validate_feature_data_type
       mcmc:
