@@ -118,15 +118,28 @@ if __name__ == "__main__":
         mark_df["UnhashedWeapon1"] = mark_df["Weapon1"].apply(get_weapon_id)
         mark_df["UnhashedWeapon2"] = mark_df["Weapon2"].apply(get_weapon_id)
 
+        mark_df["HashedWeapon1"] = mark_df["UnhashedWeapon1"].apply(hash_weapon_id)
+        mark_df["HashedWeapon2"] = mark_df["UnhashedWeapon2"].apply(hash_weapon_id)
+
         mark_df.to_csv(debug_output_file, index=False)
 
         mark_df["Type1"] = mark_df["UnhashedType1"].apply(hash_weapon_type)
         mark_df["Type2"] = mark_df["UnhashedType2"].apply(hash_weapon_type)
 
-        mark_df["Weapon1"] = mark_df["UnhashedWeapon1"].apply(hash_weapon_id)
-        mark_df["Weapon2"] = mark_df["UnhashedWeapon2"].apply(hash_weapon_id)
+        mark_df["Weapon1"] = mark_df["HashedWeapon1"]
+        mark_df["Weapon2"] = mark_df["HashedWeapon2"]
 
-        mark_df = mark_df.drop(columns=["UnhashedType1", "UnhashedType2", "UnhashedWeapon1", "UnhashedWeapon2"])
+        mark_df = mark_df.drop(
+            columns=[
+                "UnhashedType1",
+                "UnhashedType2",
+                "UnhashedWeapon1",
+                "UnhashedWeapon2",
+                "HashedWeapon1",
+                "HashedWeapon2",
+            ],
+            errors="ignore",
+        )
 
         # Ensure the FRONT_COLS are at the front and END_COLS are at the end, with the rest of the columns in between.
         # It could be that some of the FRONT_COLS or END_COLS are not present in the DataFrame, so we filter them first.
