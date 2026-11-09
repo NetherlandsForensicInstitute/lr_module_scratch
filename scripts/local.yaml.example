@@ -1,1 +1,13 @@
 data_from_disk_path: [your path here]
+output_folder: [desired subfolder of the 'data' folder]
+
+# For the 'main' data set
+relevant_input_files:
+ - h1_pairs
+ - h0_pairs
+ - h0_glocks
+
+# For the 'all glock' set, use
+relevant_input_files:
+ - all_glock_pairs
+# and add '_old' to the data_from_disk_path.
