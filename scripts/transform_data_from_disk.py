@@ -112,11 +112,13 @@ if __name__ == "__main__":
 
         # These columns are added only in the debug output file.
         # In the final output file, only the hashed values are kept.
-        mark_df["UnhashedType1"] = mark_df["Weapon1"].apply(get_weapon_type)
-        mark_df["UnhashedType2"] = mark_df["Weapon2"].apply(get_weapon_type)
+        mark_df = mark_df.rename(columns={"Weapon1": "Casing1", "Weapon2": "Casing2"}, errors="raise")
 
-        mark_df["UnhashedWeapon1"] = mark_df["Weapon1"].apply(get_weapon_id)
-        mark_df["UnhashedWeapon2"] = mark_df["Weapon2"].apply(get_weapon_id)
+        mark_df["UnhashedType1"] = mark_df["Casing1"].apply(get_weapon_type)
+        mark_df["UnhashedType2"] = mark_df["Casing2"].apply(get_weapon_type)
+
+        mark_df["UnhashedWeapon1"] = mark_df["Casing1"].apply(get_weapon_id)
+        mark_df["UnhashedWeapon2"] = mark_df["Casing2"].apply(get_weapon_id)
 
         mark_df["HashedWeapon1"] = mark_df["UnhashedWeapon1"].apply(hash_weapon_id)
         mark_df["HashedWeapon2"] = mark_df["UnhashedWeapon2"].apply(hash_weapon_id)
@@ -137,6 +139,8 @@ if __name__ == "__main__":
                 "UnhashedWeapon2",
                 "HashedWeapon1",
                 "HashedWeapon2",
+                "Casing1",
+                "Casing2",
             ],
             errors="ignore",
         )
