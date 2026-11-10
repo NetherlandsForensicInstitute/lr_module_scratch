@@ -8,6 +8,8 @@ from lir.data.models import DataStrategy, FeatureData
 from lir.util import check_type
 from sklearn.model_selection import KFold
 
+from lrmodule.content_filter import _ConditionBuilder
+
 LOG = logging.getLogger(__name__)
 
 
@@ -56,3 +58,26 @@ class CrossValidationPairs(DataStrategy):
             test_instances = np.all(~source_membership, axis=1)
 
             yield instances[training_instances], instances[test_instances]
+
+
+class TrainAllTestSubset(DataStrategy):
+    """K-fold cross-validation with to a content-filtered test set; training uses is unfiltered.
+
+    Instances matching the condition are divided into folds; each fold uses its held-out instances as test
+    data, and all remaining instances as training data. The training set therefore applies no other filters,
+    and test instances never appear in their own training set.
+    """
+
+    def __init__(self, condition: dict, folds: int = 3, random_state: int | None = None):
+        self._filter_fn = _ConditionBuilder.build_condition(condition)
+        self._kf = KFold(n_splits=folds, shuffle=random_state is not None, random_state=random_state)
+
+    def apply(self, instances: FeatureData) -> Iterator[tuple[FeatureData, FeatureData]]:
+        """Yield train/test splits; test data covers the matching subset exactly once across all folds."""
+        positions = np.flatnonzero(self._filter_fn(instances))
+        if positions.size == 0:
+            raise ValueError("TrainAllTestSubset: the test condition matched zero instances")
+        for _, fold_index in self._kf.split(positions):
+            fold_mask = np.zeros(len(instances), dtype=bool)
+            fold_mask[positions[fold_index]] = True
+            yield instances[~fold_mask], instances[fold_mask]
