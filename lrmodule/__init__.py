@@ -3,7 +3,6 @@ import shutil
 from pathlib import Path
 
 import confidence
-from lir.config.lrsystem_architectures import specific_source
 from lir.data.models import FeatureData
 from lir.datasets.feature_data_csv import FeatureDataCsvParser
 from lir.lrsystems import LRSystem
@@ -52,8 +51,8 @@ def get_reference_data(lr_system_folder: Path, file_name: str = "reference_data.
     If the data has `n` features, the CSV file should have `n+1` columns. One of the columns should be named
     "hypothesis", and contain the labels for the data. The other columns should contain the feature values.
 
-    The data is returned as an instance of the FeatureData class from lir. This class has a features and a labels
-    attribute, which can be used to access the feature values and the labels, respectively.
+    The data is returned as an instance of the FeatureData class from lir. This class has a features and a hypothesis
+    attribute, which can be used to access the feature values and the hypothesis labels, respectively.
     """
     reference_data_file = lr_system_folder / file_name
     return FeatureDataCsvParser(reference_data_file, hypothesis_column="hypothesis").get_instances()
@@ -81,8 +80,3 @@ def get_validation_experiment(model_name: str, training_data_path: Path, output_
     if reference_data_file.exists():
         shutil.copy(reference_data_file, output_folder / "reference_data.csv")
     return output_folder
-
-
-# create an alias for the specific source system, since the architecture is identical but the name is misleading
-# in the current application
-binary_lrsystem = specific_source
