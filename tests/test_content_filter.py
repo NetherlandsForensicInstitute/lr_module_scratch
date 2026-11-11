@@ -264,7 +264,7 @@ def test_complex_nested_condition():
     assert np.all(result.features == expected_result)
 
     # Act again
-    result = parse_content_filter().parse(ConfigValue.wrap([], {'condition': condition}), Path('/')).apply(instances)
+    result = parse_content_filter(ConfigValue.wrap([], {'condition': condition}), Path('/')).apply(instances)
     assert len(result) == expected_result.shape[0]
     assert np.all(result.features == expected_result)
 
@@ -274,10 +274,10 @@ def test_filter_preserves_all_fields():
     """Test that filtering preserves all fields in the InstanceData."""
     # Arrange
     features = array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
-    labels = array([1, 0, 1])
+    hypotheses = array([1, 0, 1])
     weapon1 = array(["1", "2", "1"])
     split1 = array(["t", "v", "t"])
-    instances = FeatureData(features=features, labels=labels, weapon1=weapon1, split1=split1)
+    instances = FeatureData(features=features, hypothesis=hypotheses, weapon1=weapon1, split1=split1)
 
     filter_fn = _ConditionBuilder.equals("weapon1", "1")
     content_filter = ContentFilter(filter_fn)
@@ -288,7 +288,7 @@ def test_filter_preserves_all_fields():
     # Assert
     assert len(result) == 2
     assert np.all(result.features == array([[1.0, 2.0], [5.0, 6.0]]))
-    assert np.all(result.labels == array([1, 1]))  # type: ignore[attr-defined]
+    assert np.all(result.hypothesis == array([1, 1]))
     assert np.all(getattr(result, "weapon1") == array(["1", "1"]))
     assert np.all(getattr(result, "split1") == array(["t", "t"]))
 
