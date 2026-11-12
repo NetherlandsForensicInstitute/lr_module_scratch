@@ -5,9 +5,6 @@ from pathlib import Path
 import confidence
 import pandas as pd
 
-# These input files are used to generate the output files for each mark.
-# The name of the files that are read are partial based on the input files.
-RELEVANT_INPUT_FILES = ["h1_pairs", "h0_pairs", "h0_glocks"]
 
 # These are the relevant marks and their corresponding headers for the output files.
 # The name of the files that are read are partial based on the mark names.
@@ -55,10 +52,9 @@ RELEVANT_MARKS = {
     },
 }
 
-FRONT_COLS = [
-    "Type1",
-    "Type2",
-]
+FRONT_COLS = ["Type1", "Type2", "Weapon1", "Weapon2"]
+
+
 END_COLS = ["Matching Cells", "Total Cells", "Score"]
 
 
@@ -87,16 +83,23 @@ if __name__ == "__main__":
     config = confidence.loadf(base_path / "local.yaml")
     disk_path = config.data_from_disk_path
 
+    # These input files are used to generate the output files for each mark.
+    # The name of the files that are read are partial based on the input files.
+    relevant_input_files = config.relevant_input_files
+
+    output_folder = Path(__file__).parent.parent / "data" / config.output_folder
+    output_folder.mkdir(exist_ok=True, parents=True)
+
     for mark_name, mark_data in RELEVANT_MARKS.items():
         output_file_name = mark_data["output_file"]
         headers = mark_data["headers"]
 
-        output_file = Path(__file__).parent.parent / "data" / "2026" / f"{output_file_name}"
-        debug_output_file = Path(__file__).parent.parent / "data" / "2026" / f"debug_{output_file_name}"
+        output_file = output_folder / f"{output_file_name}"
+        debug_output_file = output_folder / f"debug_{output_file_name}"
 
         mark_df = pd.DataFrame()
 
-        for base_input_filename in RELEVANT_INPUT_FILES:
+        for base_input_filename in relevant_input_files:
             input_file = f"{disk_path}/{base_input_filename}_{mark_name}.csv"
             df = pd.read_csv(input_file, header=0, skiprows=0, names=headers, dtype=str)
 

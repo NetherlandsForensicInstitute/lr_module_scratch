@@ -1,1 +1,12 @@
-data_from_disk_path: [your path here]
+# For the 'main' data set
+data_from_disk_path: path/to/databases_converted
+output_folder: 2026-Q4/all_types
+relevant_input_files:
+ - h1_pairs
+ - h0_pairs
+
+# For the 'all glock' set, use
+data_from_disk_path: path/to/databases_converted_old
+output_folder: 2026-Q4/all_glocks
+relevant_input_files:
+ - all_glock_pairs
