@@ -52,10 +52,9 @@ RELEVANT_MARKS = {
     },
 }
 
-FRONT_COLS = [
-    "Type1",
-    "Type2",
-]
+FRONT_COLS = ["Type1", "Type2", "Weapon1", "Weapon2"]
+
+
 END_COLS = ["Matching Cells", "Total Cells", "Score"]
 
 
@@ -89,7 +88,7 @@ if __name__ == "__main__":
     relevant_input_files = config.relevant_input_files
 
     output_folder = Path(__file__).parent.parent / "data" / config.output_folder
-    output_folder.mkdir(exist_ok=True)
+    output_folder.mkdir(exist_ok=True, parents=True)
 
     for mark_name, mark_data in RELEVANT_MARKS.items():
         output_file_name = mark_data["output_file"]
