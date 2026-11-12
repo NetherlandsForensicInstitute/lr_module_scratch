@@ -1,13 +1,12 @@
-data_from_disk_path: [your path here]
-output_folder: [desired subfolder of the 'data' folder]
-
 # For the 'main' data set
+data_from_disk_path: path/to/databases_converted
+output_folder: 2026-Q4/all_types
 relevant_input_files:
  - h1_pairs
  - h0_pairs
- - h0_glocks
 
 # For the 'all glock' set, use
+data_from_disk_path: path/to/databases_converted_old
+output_folder: 2026-Q4/all_glocks
 relevant_input_files:
  - all_glock_pairs
-# and add '_old' to the data_from_disk_path.
