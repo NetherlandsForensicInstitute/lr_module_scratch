@@ -12,9 +12,8 @@ requires-python = ">=3.13, <3.14"  # `pytensor` (required by `pymc` doesn't supp
 readme = "README.md"
 license = {text = "Apache Software License 2.0"}
 
-lir = {url = "https://github.com/NetherlandsForensicInstitute/lir", rev = "335f8e0dc458b3d969b1a126e492c04cbf8499ab" }
 dependencies = [
-    "lir==1.8.0",
+    "lir==1.9.1",
     "pandas",
     "pytest-randomly",
 ]
