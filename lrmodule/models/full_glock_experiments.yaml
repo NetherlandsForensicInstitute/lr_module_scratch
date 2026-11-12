@@ -1,0 +1,321 @@
+output_path: output/all_glocks
+
+input_file_fp: data/all_glocks/firing_pin_impression.csv
+input_file_bf: data/all_glocks/breech_face_impression.csv
+input_file_as: data/all_glocks/aperture_shear.csv
+
+outputs:
+  # These outputs are the same across experiments.
+  - method: metrics_csv
+    columns:
+      - cllr
+      - cllr_min
+      - lrmodule.metrics.count
+      - lrmodule.metrics.count_h1
+      - lrmodule.metrics.count_h2
+      - lrmodule.metrics.mean_llr_h1
+      - lrmodule.metrics.mean_llr_h2
+  - method: metrics_bars
+    metrics:
+      - cllr
+      - cllr_min
+  - pav
+  - ece
+  - llr_interval
+  - lr_histogram
+
+###########
+# Filters #
+###########
+
+filter_heterogenous:
+  # Filter to only include pairs of different material
+  method: lrmodule.content_filter.parse_content_filter
+  condition:
+    type: columns_not_equal
+    column1: Material1
+    column2: Material2
+
+filter_homogeneous:
+  # Filter to only include pairs of the same material
+  method: lrmodule.content_filter.parse_content_filter
+  condition:
+    type: columns_equal
+    column1: Material1
+    column2: Material2
+
+filter_nickel_only:
+  # Filter to only include Nickel-Nickel pairs
+  method: lrmodule.content_filter.parse_content_filter
+  condition:
+    type: and
+    conditions:
+      - type: equals
+        column: Material1
+        value: "Nickel"
+      - type: equals
+        column: Material2
+        value: "Nickel"
+
+filter_brass_only:
+  # Filter to only include Brass-Brass pairs
+  method: lrmodule.content_filter.parse_content_filter
+  condition:
+    type: and
+    conditions:
+      - type: equals
+        column: Material1
+        value: "Brass"
+      - type: equals
+        column: Material2
+        value: "Brass"
+
+data_parameters:
+  - name: filter.steps.filter_materials
+    options:
+      - option_name: no_filter
+        substitutions:
+          - path: filter.steps.filter_materials
+            value: identity
+      - option_name: filter_heterogenous
+        substitutions:
+          - path: filter.steps.filter_materials
+            value: ${filter_heterogenous}
+      - option_name: filter_homogeneous
+        substitutions:
+          - path: filter.steps.filter_materials
+            value: ${filter_homogeneous}
+      - option_name: filter_nickel_only
+        substitutions:
+          - path: filter.steps.filter_materials
+            value: ${filter_nickel_only}
+      - option_name: filter_brass_only
+        substitutions:
+          - path: filter.steps.filter_materials
+            value: ${filter_brass_only}
+      - option_name: train_all_val_nickel
+        substitutions:
+          - path: filter.steps.filter_materials
+            value: identity
+          - path: splits
+            value:
+              strategy: lrmodule.input_data.TrainAllTestSubset
+              folds: 3
+              random_state: 0
+              condition:
+                type: and
+                conditions:
+                  - type: equals
+                    column: Material1
+                    value: "Nickel"
+                  - type: equals
+                    column: Material2
+                    value: "Nickel"
+      - option_name: train_all_val_brass
+        substitutions:
+          - path: filter.steps.filter_materials
+            value: identity
+          - path: splits
+            value:
+              strategy: lrmodule.input_data.TrainAllTestSubset
+              folds: 3
+              random_state: 0
+              condition:
+                type: and
+                conditions:
+                  - type: equals
+                    column: Material1
+                    value: "Brass"
+                  - type: equals
+                    column: Material2
+                    value: "Brass"
+
+##################
+# Data providers #
+##################
+
+fp_data:
+  method: parse_features_from_csv_file
+  file: ${input_file_fp}
+  hypothesis_column: Hypothesis
+  source_id_column:
+    - Weapon1
+    - Weapon2
+  feature_columns:
+    - Matching Cells
+    - Total Cells
+  extra_fields:
+    - Material1
+    - Material2
+
+bf_data:
+  method: parse_features_from_csv_file
+  file: ${input_file_bf}
+  hypothesis_column: Hypothesis
+  source_id_column:
+    - Weapon1
+    - Weapon2
+  feature_columns:
+    - Matching Cells
+    - Total Cells
+  extra_fields:
+    - Material1
+    - Material2
+
+as_data:
+  method: parse_features_from_csv_file
+  file: ${input_file_as}
+  hypothesis_column: Hypothesis
+  source_id_column:
+    - Weapon1
+    - Weapon2
+  feature_columns:
+    - Score
+  extra_fields:
+    - Material1
+    - Material2
+
+data_splits:
+  strategy: lrmodule.input_data.CrossValidationPairs
+  folds: 3
+  random_state: 0
+
+##############
+# LR systems #
+##############
+
+fp_lrsystem:
+  architecture: lrmodule.binary_lrsystem
+  modules:
+    method: logging_pipeline
+    include_fields:
+      - source_ids
+    steps:
+      validate_data: validate_feature_data_type
+      mcmc:
+        method: mcmc
+        # include_plots: True
+        distribution_h1: betabinomial
+        parameters_h1:
+          alpha:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+          beta:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+        distribution_h2: binomial
+        parameters_h2:
+          p:
+            prior: beta
+            alpha: 0.5
+            beta: 0.5
+        interval:
+          - 0.05
+          - 0.95
+      bounder: iv_bounder
+
+as_lrsystem:
+  architecture: lrmodule.binary_lrsystem
+  modules:
+    steps:
+      validate_data: validate_feature_data_type
+      transform:
+        method: lrmodule.helpers.transform_marktype_ccf
+      bootstrap:
+        method: bootstrap
+        n_bootstraps: 25
+        seed: 0
+        points: equidistant
+        n_points: 100
+        steps:
+          kde:
+            method: kde
+            bandwidth:
+              - 0.05 # KNM kernel size
+              - 0.23 # KM kernel size
+          bounder: iv_bounder
+
+bf_lrsystem:
+  architecture: lrmodule.binary_lrsystem
+  modules:
+    steps:
+      validate_data: validate_feature_data_type
+      mcmc:
+        method: mcmc
+        # include_plots: True
+        distribution_h1: betabinomial
+        parameters_h1:
+          alpha:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+          beta:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+        distribution_h2: binomial
+        parameters_h2:
+          p:
+            prior: beta
+            alpha: 0.5
+            beta: 0.5
+        interval:
+          - 0.05
+          - 0.95
+        draw_count: 1000
+        tune_count: 10000
+      bounding: iv_bounder
+
+###############
+# Experiments #
+###############
+
+experiments:
+  - name: firing pin
+    strategy: grid
+    lrsystem: ${fp_lrsystem}
+    data:
+      provider: ${fp_data}
+      filter:
+        method: pipeline
+        steps:
+          filter_materials:
+          write_csv:
+            method: csv_writer
+            path: data_after_filter.csv
+      splits: ${data_splits}
+    data_parameters: ${data_parameters}
+    output: ${outputs}
+  - name: breech face
+    strategy: grid
+    lrsystem: ${bf_lrsystem}
+    data:
+      provider: ${bf_data}
+      filter:
+        method: pipeline
+        steps:
+          filter_materials:
+          write_csv:
+            method: csv_writer
+            path: data_after_filter.csv
+      splits: ${data_splits}
+    data_parameters: ${data_parameters}
+    output: ${outputs}
+  - name: aperture shear
+    strategy: grid
+    enable_parallelization: True
+    lrsystem: ${as_lrsystem}
+    data:
+      provider: ${as_data}
+      filter:
+        method: pipeline
+        steps:
+          filter_materials:
+          write_csv:
+            method: csv_writer
+            path: data_after_filter.csv
+      splits: ${data_splits}
+    data_parameters: ${data_parameters}
+    output: ${outputs}
