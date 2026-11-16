@@ -52,7 +52,7 @@ def get_reference_data(lr_system_folder: Path, file_name: str = "reference_data.
     "hypothesis", and contain the labels for the data. The other columns should contain the feature values.
 
     The data is returned as an instance of the FeatureData class from lir. This class has a features and a hypothesis
-    attribute, which can be used to access the feature values and the hypothesis labels, respectively.
+    attribute, which can be used to access the feature values and the labels, respectively.
     """
     reference_data_file = lr_system_folder / file_name
     return FeatureDataCsvParser(reference_data_file, hypothesis_column="hypothesis").get_instances()
