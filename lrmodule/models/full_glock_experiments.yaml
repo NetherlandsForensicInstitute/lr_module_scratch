@@ -1,134 +1,8 @@
 output_path: output/all_glocks
 
-input_file_fp: data/all_glocks/firing_pin_impression.csv
-input_file_bf: data/all_glocks/breech_face_impression.csv
-input_file_as: data/all_glocks/aperture_shear.csv
-
-outputs:
-  # These outputs are the same across experiments.
-  - method: metrics_csv
-    columns:
-      - cllr
-      - cllr_min
-      - lrmodule.metrics.count
-      - lrmodule.metrics.count_h1
-      - lrmodule.metrics.count_h2
-      - lrmodule.metrics.mean_llr_h1
-      - lrmodule.metrics.mean_llr_h2
-  - method: metrics_bars
-    metrics:
-      - cllr
-      - cllr_min
-  - pav
-  - ece
-  - llr_interval
-  - lr_histogram
-
-###########
-# Filters #
-###########
-
-filter_heterogenous:
-  # Filter to only include pairs of different material
-  method: lrmodule.content_filter.parse_content_filter
-  condition:
-    type: columns_not_equal
-    column1: Material1
-    column2: Material2
-
-filter_homogeneous:
-  # Filter to only include pairs of the same material
-  method: lrmodule.content_filter.parse_content_filter
-  condition:
-    type: columns_equal
-    column1: Material1
-    column2: Material2
-
-filter_nickel_only:
-  # Filter to only include Nickel-Nickel pairs
-  method: lrmodule.content_filter.parse_content_filter
-  condition:
-    type: and
-    conditions:
-      - type: equals
-        column: Material1
-        value: "Nickel"
-      - type: equals
-        column: Material2
-        value: "Nickel"
-
-filter_brass_only:
-  # Filter to only include Brass-Brass pairs
-  method: lrmodule.content_filter.parse_content_filter
-  condition:
-    type: and
-    conditions:
-      - type: equals
-        column: Material1
-        value: "Brass"
-      - type: equals
-        column: Material2
-        value: "Brass"
-
-data_parameters:
-  - name: filter.steps.filter_materials
-    options:
-      - option_name: no_filter
-        substitutions:
-          - path: filter.steps.filter_materials
-            value: identity
-      - option_name: filter_heterogenous
-        substitutions:
-          - path: filter.steps.filter_materials
-            value: ${filter_heterogenous}
-      - option_name: filter_homogeneous
-        substitutions:
-          - path: filter.steps.filter_materials
-            value: ${filter_homogeneous}
-      - option_name: filter_nickel_only
-        substitutions:
-          - path: filter.steps.filter_materials
-            value: ${filter_nickel_only}
-      - option_name: filter_brass_only
-        substitutions:
-          - path: filter.steps.filter_materials
-            value: ${filter_brass_only}
-      - option_name: train_all_val_nickel
-        substitutions:
-          - path: filter.steps.filter_materials
-            value: identity
-          - path: splits
-            value:
-              strategy: lrmodule.input_data.TrainAllTestSubset
-              folds: 3
-              random_state: 0
-              condition:
-                type: and
-                conditions:
-                  - type: equals
-                    column: Material1
-                    value: "Nickel"
-                  - type: equals
-                    column: Material2
-                    value: "Nickel"
-      - option_name: train_all_val_brass
-        substitutions:
-          - path: filter.steps.filter_materials
-            value: identity
-          - path: splits
-            value:
-              strategy: lrmodule.input_data.TrainAllTestSubset
-              folds: 3
-              random_state: 0
-              condition:
-                type: and
-                conditions:
-                  - type: equals
-                    column: Material1
-                    value: "Brass"
-                  - type: equals
-                    column: Material2
-                    value: "Brass"
+input_file_fp: data/2026-Q4/all_glocks/firing_pin_impression.csv
+input_file_bf: data/2026-Q4/all_glocks/breech_face_impression.csv
+input_file_as: data/2026-Q4/all_glocks/aperture_shear.csv
 
 ##################
 # Data providers #
@@ -264,10 +138,127 @@ bf_lrsystem:
         interval:
           - 0.05
           - 0.95
-        draw_count: 1000
-        tune_count: 10000
       bounding: iv_bounder
 
+###########
+# Outputs #
+###########
+
+outputs:
+  # These outputs are the same across experiments.
+  - method: metrics_csv
+    columns:
+      - cllr
+      - cllr_min
+      - lrmodule.metrics.count
+      - devpav
+      - lrmodule.metrics.count_h1
+      - lrmodule.metrics.count_h2
+      - lrmodule.metrics.mean_llr_h1
+      - lrmodule.metrics.mean_llr_h2
+  - method: metrics_bars
+    metrics:
+      - cllr
+      - cllr_min
+  - pav
+  - ece
+  - llr_interval
+  - lr_histogram
+  - llr_overestimation
+
+###########
+# Filters #
+###########
+
+filter_heterogenous:
+  # Filter to only include pairs of different material
+  method: lrmodule.content_filter.parse_content_filter
+  condition:
+    type: columns_not_equal
+    column1: Material1
+    column2: Material2
+
+filter_homogeneous:
+  # Filter to only include pairs of the same material
+  method: lrmodule.content_filter.parse_content_filter
+  condition:
+    type: columns_equal
+    column1: Material1
+    column2: Material2
+
+nickel_only_condition:
+  type: and
+  conditions:
+    - type: equals
+      column: Material1
+      value: "Nickel"
+    - type: equals
+      column: Material2
+      value: "Nickel"
+
+filter_nickel_only:
+  # Filter to only include Nickel-Nickel pairs
+  method: lrmodule.content_filter.parse_content_filter
+  condition: ${nickel_only_condition}
+
+brass_only_condition:
+  type: and
+  conditions:
+    - type: equals
+      column: Material1
+      value: "Brass"
+    - type: equals
+      column: Material2
+      value: "Brass"
+
+filter_brass_only:
+  # Filter to only include Brass-Brass pairs
+  method: lrmodule.content_filter.parse_content_filter
+  condition: ${brass_only_condition}
+
+data_parameters:
+  - name: filter.steps.filter_materials
+    options:
+      - option_name: no_filter
+        substitutions:
+          - path: filter.steps.filter_materials
+            value: identity
+      - option_name: filter_heterogenous
+        substitutions:
+          - path: filter.steps.filter_materials
+            value: ${filter_heterogenous}
+      - option_name: filter_homogeneous
+        substitutions:
+          - path: filter.steps.filter_materials
+            value: ${filter_homogeneous}
+      - option_name: filter_nickel_only
+        substitutions:
+          - path: filter.steps.filter_materials
+            value: ${filter_nickel_only}
+      - option_name: filter_brass_only
+        substitutions:
+          - path: filter.steps.filter_materials
+            value: ${filter_brass_only}
+      - option_name: train_all_val_nickel
+        substitutions:
+          - path: filter.steps.filter_materials
+            value: identity
+          - path: splits
+            value:
+              strategy: lrmodule.input_data.TrainAllTestSubset
+              folds: 3
+              random_state: 0
+              condition: ${nickel_only_condition}
+      - option_name: train_all_val_brass
+        substitutions:
+          - path: filter.steps.filter_materials
+            value: identity
+          - path: splits
+            value:
+              strategy: lrmodule.input_data.TrainAllTestSubset
+              folds: 3
+              random_state: 0
+              condition: ${brass_only_condition}
 ###############
 # Experiments #
 ###############
