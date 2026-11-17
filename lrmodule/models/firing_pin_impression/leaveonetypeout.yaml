@@ -51,7 +51,7 @@ cmc_data_provider:
     - Type2
 
 lrsystem: &firing_pin_cmc_lrsystem
-  architecture: lrmodule.binary_lrsystem
+  architecture: binary_lrsystem
   modules:
     method: logging_pipeline
     include_fields:
@@ -90,6 +90,7 @@ experiments:
     strategy: grid
     lrsystem: *firing_pin_cmc_lrsystem
     data:
+      setup: splits
       provider: ${cmc_data_provider}
       filter:
         method: pipeline
@@ -127,6 +128,7 @@ experiments:
     strategy: single_run
     lrsystem: *firing_pin_cmc_lrsystem
     data:
+      setup: splits
       provider: ${cmc_data_provider}
       filter: ${filter_equal_types}
 
@@ -146,6 +148,7 @@ experiments:
     strategy: single_run
     lrsystem: *firing_pin_cmc_lrsystem
     data:
+      setup: splits
       provider: ${cmc_data_provider}
       filter: ${filter_equal_types}
 

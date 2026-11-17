@@ -1,6 +1,7 @@
 output_path: output/${timestamp}_breech_face_impression_matlab_python
 
 matlab_data: &matlab_data
+  setup: splits
   provider:
     method: parse_features_from_csv_file
     file: data/2023/breech_face_impression.csv
@@ -19,6 +20,7 @@ matlab_data: &matlab_data
     strategy: lrmodule.input_data.PredefinedCrossValidation
 
 python_data: &python_data
+  setup: splits
   provider:
     method: parse_features_from_csv_file
     file: data/2026/breech_face_impression.csv
@@ -57,7 +59,7 @@ python_data: &python_data
         repeat: 1
 
 breech_face_cmc_lrsystem: &breech_face_cmc_lrsystem
-  architecture: lrmodule.binary_lrsystem
+  architecture: binary_lrsystem
   modules:
     steps:
       validate_data: validate_feature_data_type
