@@ -59,7 +59,7 @@ data_splits:
 ##############
 
 fp_lrsystem:
-  architecture: lrmodule.binary_lrsystem
+  architecture: binary_lrsystem
   modules:
     method: logging_pipeline
     include_fields:
@@ -91,7 +91,7 @@ fp_lrsystem:
       bounder: iv_bounder
 
 as_lrsystem:
-  architecture: lrmodule.binary_lrsystem
+  architecture: binary_lrsystem
   modules:
     steps:
       validate_data: validate_feature_data_type
@@ -112,7 +112,7 @@ as_lrsystem:
           bounder: iv_bounder
 
 bf_lrsystem:
-  architecture: lrmodule.binary_lrsystem
+  architecture: binary_lrsystem
   modules:
     steps:
       validate_data: validate_feature_data_type
@@ -268,6 +268,7 @@ experiments:
     strategy: grid
     lrsystem: ${fp_lrsystem}
     data:
+      setup: splits
       provider: ${fp_data}
       filter:
         method: pipeline
@@ -283,6 +284,7 @@ experiments:
     strategy: grid
     lrsystem: ${bf_lrsystem}
     data:
+      setup: splits
       provider: ${bf_data}
       filter:
         method: pipeline
@@ -299,6 +301,7 @@ experiments:
     enable_parallelization: True
     lrsystem: ${as_lrsystem}
     data:
+      setup: splits
       provider: ${as_data}
       filter:
         method: pipeline
