@@ -6,7 +6,13 @@ from lir.config.base import ConfigValue
 from lir.data.models import FeatureData
 from numpy import array
 
-from lrmodule.content_filter import ContentFilter, _ConditionBuilder, parse_content_filter, SourcePairRepeatFilter
+from lrmodule.content_filter import (
+    ContentFilter,
+    PairDirectionFilter,
+    SourcePairRepeatFilter,
+    _ConditionBuilder,
+    parse_content_filter,
+)
 
 
 def test_equals_filter():
@@ -111,6 +117,86 @@ def test_source_pair_repeat_filter():
     assert len(result_2) == 1
     assert np.all(result_2.features == array([[7.0, 8.0]]))
     assert np.all(getattr(result_2, "source_ids") == array([["3", "1"]]))
+
+
+def test_pair_direction_filter_smallest_first():
+    """Test that PairDirectionFilter keeps the row of which the first source has the lowest value."""
+    # Arrange
+    features = array([[1.0, 30.0], [2.0, 20.0], [3.0, 10.0], [4.0, 40.0], [5.0, 50.0]])
+    source_ids = array([["a", "b"], ["b", "a"], ["c", "d"], ["d", "c"], ["e", "e"]])
+    instances = FeatureData(features=features, source_ids=source_ids)
+
+    direction_filter = PairDirectionFilter(
+        feature_columns=["Matching Cells", "Total Cells"], column="Total Cells", direction="smallest_first"
+    )
+
+    # Act
+    result = direction_filter.apply(instances)
+
+    # Assert
+    # pair (a,b)/(b,a): first sources have N 30 and 20 -> keep (b,a) with N 20
+    # pair (c,d)/(d,c): first sources have N 10 and 40 -> keep (c,d) with N 10
+    # pair (e,e) occurs once and is kept as-is
+    assert len(result) == 3
+    assert np.all(result.features == array([[2.0, 20.0], [3.0, 10.0], [5.0, 50.0]]))
+    assert np.all(result.source_ids == array([["b", "a"], ["c", "d"], ["e", "e"]]))
+
+
+def test_pair_direction_filter_largest_first():
+    """Test that PairDirectionFilter keeps the row of which the first source has the highest value."""
+    # Arrange
+    features = array([[1.0, 30.0], [2.0, 20.0], [3.0, 10.0], [4.0, 40.0]])
+    source_ids = array([["a", "b"], ["b", "a"], ["c", "d"], ["d", "c"]])
+    instances = FeatureData(features=features, source_ids=source_ids)
+
+    direction_filter = PairDirectionFilter(
+        feature_columns=["Matching Cells", "Total Cells"], column="Total Cells", direction="largest_first"
+    )
+
+    # Act
+    result = direction_filter.apply(instances)
+
+    # Assert
+    # pair (a,b)/(b,a): first sources have N 30 and 20 -> keep (a,b) with N 30
+    # pair (c,d)/(d,c): first sources have N 10 and 40 -> keep (d,c) with N 40
+    assert len(result) == 2
+    assert np.all(result.features == array([[1.0, 30.0], [4.0, 40.0]]))
+    assert np.all(result.source_ids == array([["a", "b"], ["d", "c"]]))
+
+
+def test_pair_direction_filter_tie_keeps_first_row():
+    """Test that a tie in the column value keeps the same row for both extreme rules."""
+    # Arrange
+    features = array([[1.0, 20.0], [2.0, 20.0]])
+    source_ids = array([["a", "b"], ["b", "a"]])
+    instances = FeatureData(features=features, source_ids=source_ids)
+
+    smallest_first = PairDirectionFilter(feature_columns=["Matching Cells", "Total Cells"], column="Total Cells", direction="smallest_first")
+    largest_first = PairDirectionFilter(feature_columns=["Matching Cells", "Total Cells"], column="Total Cells", direction="largest_first")
+
+    # Act
+    result_smallest = smallest_first.apply(instances)
+    result_largest = largest_first.apply(instances)
+
+    # Assert
+    assert np.all(result_smallest.features == array([[1.0, 20.0]]))
+    assert np.all(result_largest.features == array([[1.0, 20.0]]))
+
+
+def test_pair_direction_filter_invalid_arguments():
+    """Test that PairDirectionFilter validates its arguments."""
+    # Act & Assert
+    with pytest.raises(ValueError, match="unknown direction"):
+        PairDirectionFilter(feature_columns=["Matching Cells", "Total Cells"], column="Total Cells", direction="middle_first")
+
+    with pytest.raises(ValueError, match="not found in feature_columns"):
+        PairDirectionFilter(feature_columns=["Matching Cells"], column="Total Cells", direction="smallest_first")
+
+    # Act & Assert
+    with pytest.raises(ValueError, match="source_ids"):
+        PairDirectionFilter(
+            feature_columns=["Matching Cells"], column="Matching Cells", direction="smallest_first"
+        ).apply(FeatureData(features=array([[1.0]])))
 
 
 def test_in_list_filter():
