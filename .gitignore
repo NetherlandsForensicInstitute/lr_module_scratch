@@ -1,6 +1,10 @@
 output/
 
 *~
+
+# macOS
+.DS_Store
+
 # Project specific
 lrsystem_output/
 .testmondata
