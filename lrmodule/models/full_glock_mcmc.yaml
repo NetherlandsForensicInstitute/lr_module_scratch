@@ -7,9 +7,9 @@ input_file_bf: data/2026-Q4/all_glocks/breech_face_impression.csv
 # Data providers #
 ##################
 
-data:
+data_fp:
   method: parse_features_from_csv_file
-  file:
+  file: ${input_file_fp}
   hypothesis_column: Hypothesis
   source_id_column:
     - Weapon1
@@ -21,19 +21,25 @@ data:
     - Material1
     - Material2
 
-data_parameters:
-  - path: training.file
-    options:
-      - option_name: fp
-        value: ${input_file_fp}
-      - option_name: bf
-        value: ${input_file_bf}
+data_bf:
+  method: parse_features_from_csv_file
+  file: ${input_file_bf}
+  hypothesis_column: Hypothesis
+  source_id_column:
+    - Weapon1
+    - Weapon2
+  feature_columns:
+    - Matching Cells
+    - Total Cells
+  extra_fields:
+    - Material1
+    - Material2
 
 ##############
 # LR systems #
 ##############
 
-lrsystem:
+lrsystem_fp:
   architecture: binary_lrsystem
   modules:
     steps:
@@ -64,16 +70,49 @@ lrsystem:
           - 0.95
       bounder: iv_bounder
 
+lrsystem_bf:
+  architecture: binary_lrsystem
+  modules:
+    steps:
+      validate_data: validate_feature_data_type
+      mcmc:
+        method: mcmc
+        include_parameter_outputs: True
+        distribution_h1: betabinomial
+        parameters_h1:
+          alpha:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+          beta:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+        distribution_h2: binomial
+        parameters_h2:
+          p:
+            prior: beta
+            alpha: 0.5
+            beta: 0.5
+        interval:
+          - 0.05
+          - 0.95
+      bounder: iv_bounder
+
 ###############
 # Experiments #
 ###############
 
 experiments:
-  - name: cmc_minus_one
-    strategy: grid
-    lrsystem: ${lrsystem}
+  - name: fp_cmc_minus_one
+    strategy: single_run
+    lrsystem: ${lrsystem_fp}
     data:
       setup: inference
-      training: ${data}
-    data_parameters: ${data_parameters}
-    output:
+      training: ${data_fp}
+  - name: bf_cmc
+    strategy: single_run
+    lrsystem: ${lrsystem_bf}
+    data:
+      setup: inference
+      training: ${data_bf}
