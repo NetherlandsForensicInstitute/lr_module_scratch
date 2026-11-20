@@ -41,101 +41,93 @@ sample_h1 = sample_h1/total_cells_h1
 sample_h1 = sample_h1.ravel()
 sample_h1 = rng.choice(sample_h1, sample_size, replace=False)
 
-# fig, ax = plt.subplots(nrows=4, ncols=2, figsize=(8, 4))
-#
-# sns.kdeplot(data=sample_h1, color="crimson", label="Dataset H1", ax=ax[0,0])
-# df_nn_h1 = scores[(scores['Hypothesis']==1) & (scores['Material1']=='Nickel') & (scores['Material2']=='Nickel')]
-# df_nn_h1['pct'] = df_nn_h1['Matching Cells']/df_nn_h1['Total Cells']
-# sns.histplot(data=df_nn_h1, x="pct", bins=20, kde=False, stat="density", ax=ax[0,0])
-# ax[0,0].set_xlabel("Value")
-# ax[0,0].set_ylabel("Density")
-# ax[0,0].legend()
-# ax[0,0].set_title('Model H1 versus Nickel/Nickel')
-# plt.tight_layout()
-#
-# sns.kdeplot(data=sample_h2, color="crimson", label="Dataset H2", ax=ax[0,1], bw_adjust=0.01)
-# df_nn_h2 = scores[(scores['Hypothesis']==0) & (scores['Material1']=='Nickel') & (scores['Material2']=='Nickel')]
-# df_nn_h2['pct'] = df_nn_h2['Matching Cells']/df_nn_h2['Total Cells']
-# sns.histplot(data=df_nn_h2, x="pct", bins=200, kde=False, stat="density", ax=ax[0,1])
-# ax[0,1].set_xlabel("Value")
-# ax[0,1].set_ylabel("Density")
-# ax[0,1].legend()
-# ax[0,1].set_title('Model H2 versus Nickel/Nickel')
-# plt.tight_layout()
-#
-# sns.kdeplot(data=sample_h1, color="crimson", label="Dataset H1", ax=ax[1,0])
-# df_bb_h1 = scores[(scores['Hypothesis']==1) & (scores['Material1']=='Brass') & (scores['Material2']=='Brass')]
-# df_bb_h1['pct'] = df_bb_h1['Matching Cells']/df_bb_h1['Total Cells']
-# sns.histplot(data=df_bb_h1, x="pct", bins=20, kde=False, stat="density", ax=ax[1,0])
-# ax[1,0].set_xlabel("Value")
-# ax[1,0].set_ylabel("Density")
-# ax[1,0].legend()
-# ax[1,0].set_title('Model H1 versus Brass/Brass')
-# plt.tight_layout()
-#
-# sns.kdeplot(data=sample_h2, color="crimson", label="Dataset H2", ax=ax[1,1], bw_adjust=0.01)
-# df_bb_h2 = scores[(scores['Hypothesis']==0) & (scores['Material1']=='Brass') & (scores['Material2']=='Brass')]
-# df_bb_h2['pct'] = df_bb_h2['Matching Cells']/df_bb_h2['Total Cells']
-# sns.histplot(data=df_bb_h2, x="pct", bins=200, kde=False, stat="density", ax=ax[1,1])
-# ax[1,1].set_xlabel("Value")
-# ax[1,1].set_ylabel("Density")
-# ax[1,1].legend()
-# ax[1,1].set_title('Model H2 versus Brass/Brass')
-# plt.tight_layout()
-#
-# sns.kdeplot(data=sample_h1, color="crimson", label="Dataset H1", ax=ax[2,0])
-# df_bb_h1 = scores[(scores['Hypothesis']==1) & (scores['Material1']=='Brass') & (scores['Material2']=='Brass')|
-#     ((scores['Hypothesis']==1) & (scores['Material2']=='Nickle') & (scores['Material1']=='Brass'))]
-# df_bb_h1['pct'] = df_bb_h1['Matching Cells']/df_bb_h1['Total Cells']
-# sns.histplot(data=df_bb_h1, x="pct", bins=20, kde=False, stat="density", ax=ax[2,0])
-# ax[2,0].set_xlabel("Value")
-# ax[2,0].set_ylabel("Density")
-# ax[2,0].legend()
-# ax[2,0].set_title('Model H1 versus Nickel/Brass')
-# plt.tight_layout()
-#
-# sns.kdeplot(data=sample_h2, color="crimson", label="Dataset H2", ax=ax[2,1], bw_adjust=0.01)
-# df_bb_h2 = scores[((scores['Hypothesis']==0) & (scores['Material1']=='Nickle') & (scores['Material2']=='Brass'))|
-#     ((scores['Hypothesis']==0) & (scores['Material2']=='Nickle') & (scores['Material1']=='Brass'))]
-# df_bb_h2['pct'] = df_bb_h2['Matching Cells']/df_bb_h2['Total Cells']
-# sns.histplot(data=df_bb_h2, x="pct", bins=200, kde=False, stat="density", ax=ax[2,1])
-# ax[2,1].set_xlabel("Value")
-# ax[2,1].set_ylabel("Density")
-# ax[2,1].legend()
-# ax[2,1].set_title('Model H2 versus Nickel/Brass')
-# plt.tight_layout()
-#
-# sns.kdeplot(data=sample_h1, color="crimson", label="Dataset H1", ax=ax[3,0])
-# df_bb_h1 = scores[(scores['Hypothesis']==1)]
-# df_bb_h1['pct'] = df_bb_h1['Matching Cells']/df_bb_h1['Total Cells']
-# sns.histplot(data=df_bb_h1, x="pct", bins=20, kde=False, stat="density", ax=ax[3,0])
-# ax[3,0].set_xlabel("Value")
-# ax[3,0].set_ylabel("Density")
-# ax[3,0].legend()
-# ax[3,0].set_title('Model H1 versus alles')
-# plt.tight_layout()
+sample_h1 = pd.DataFrame(sample_h1, columns=['pct'])
+sample_h2 = pd.DataFrame(sample_h2, columns=['pct'])
 
-fig, ax = plt.subplots(figsize=(8, 4))
+fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(8, 4))
 
-# sns.kdeplot(data=sample_h2, color="crimson", label="Dataset H2", ax=ax[3,1], bw_adjust=0.01)
-# df_bb_h2 = scores[(scores['Hypothesis']==0)]
-# df_bb_h2['pct'] = df_bb_h2['Matching Cells']/df_bb_h2['Total Cells']
-# sns.histplot(data=df_bb_h2, x="pct", bins=200, kde=False, stat="density", ax=ax[3,1])
-# ax[3,1].set_xlabel("Value")
-# ax[3,1].set_ylabel("Density")
-# ax[3,1].legend()
-# ax[3,1].set_title('Model H2 versus alles')
-# plt.tight_layout()sns.kdeplot(data=sample_h2, color="crimson", label="Dataset H2", ax=ax[3,1], bw_adjust=0.01)
+df_nn_h1 = scores[(scores['Hypothesis']==1) & (scores['Material1']=='Nickel') & (scores['Material2']=='Nickel')]
+df_nn_h1['pct'] = df_nn_h1['Matching Cells']/df_nn_h1['Total Cells']
+sns.histplot(data=df_nn_h1, x="pct", binwidth=0.002, kde=False, stat="density", ax=ax[0,0])
+sns.histplot(data=sample_h1, x="pct", binwidth=0.002, kde=False, stat="density", ax=ax[0,0])
+ax[0,0].set_xlabel("Value")
+ax[0,0].set_ylabel("Density")
+ax[0,0].legend()
+ax[0,0].set_title('Model H1 versus Nickel/Nickel')
+plt.tight_layout()
+
+df_bb_h1 = scores[(scores['Hypothesis']==1) & (scores['Material1']=='Brass') & (scores['Material2']=='Brass')]
+df_bb_h1['pct'] = df_bb_h1['Matching Cells']/df_bb_h1['Total Cells']
+sns.histplot(data=df_bb_h1, x="pct", binwidth=0.002, kde=False, stat="density", ax=ax[0,1])
+sns.histplot(data=sample_h1, x="pct", binwidth=0.002, kde=False, stat="density", ax=ax[0,1])
+ax[0,1].set_xlabel("Value")
+ax[0,1].set_ylabel("Density")
+ax[0,1].legend()
+ax[0,1].set_title('Model H1 versus Brass/Brass')
+plt.tight_layout()
+
+df_bb_h1 = scores[(scores['Hypothesis']==1) & (scores['Material1']=='Nickel') & (scores['Material2']=='Brass')|
+    ((scores['Hypothesis']==1) & (scores['Material2']=='Nickel') & (scores['Material1']=='Brass'))]
+df_bb_h1['pct'] = df_bb_h1['Matching Cells']/df_bb_h1['Total Cells']
+sns.histplot(data=df_bb_h1, x="pct", binwidth=0.002, kde=False, stat="density", ax=ax[1,0])
+sns.histplot(data=sample_h1, x="pct", binwidth=0.002, kde=False, stat="density", ax=ax[1,0])
+ax[1,0].set_xlabel("Value")
+ax[1,0].set_ylabel("Density")
+ax[1,0].legend()
+ax[1,0].set_title('Model H1 versus Nickel/Brass')
+plt.tight_layout()
+
+df_bb_h1 = scores[(scores['Hypothesis']==1)]
+df_bb_h1['pct'] = df_bb_h1['Matching Cells']/df_bb_h1['Total Cells']
+sns.histplot(data=sample_h1, x="pct", binwidth=0.002, kde=False, stat="density", ax=ax[1,1])
+sns.histplot(data=df_bb_h1, x="pct", binwidth=0.002, kde=False, stat="density", ax=ax[1,1])
+ax[1,1].set_xlabel("Value")
+ax[1,1].set_ylabel("Density")
+ax[1,1].legend()
+ax[1,1].set_title('Model H1 versus alles')
+plt.tight_layout()
+
+fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(8, 4))
+
+df_nn_h2 = scores[(scores['Hypothesis']==0) & (scores['Material1']=='Nickel') & (scores['Material2']=='Nickel')]
+df_nn_h2['pct'] = df_nn_h2['Matching Cells']/df_nn_h2['Total Cells']
+sns.histplot(data=df_nn_h2, x="pct", binwidth=0.002, kde=False, stat="density", ax=ax[0,0])
+sns.histplot(data=sample_h2, x="pct", binwidth=0.002, kde=False, stat="density", ax=ax[0,0])
+ax[0,0].set_xlabel("Value")
+ax[0,0].set_ylabel("Density")
+ax[0,0].legend()
+ax[0,0].set_title('Model H2 versus Nickel/Nickel')
+plt.tight_layout()
+
+df_bb_h2 = scores[(scores['Hypothesis']==0) & (scores['Material1']=='Brass') & (scores['Material2']=='Brass')]
+df_bb_h2['pct'] = df_bb_h2['Matching Cells']/df_bb_h2['Total Cells']
+sns.histplot(data=df_bb_h2, x="pct", binwidth=0.002, kde=False, stat="density", ax=ax[0,1])
+sns.histplot(data=sample_h2, x="pct", binwidth=0.002, kde=False, stat="density", ax=ax[0,1])
+ax[0,1].set_xlabel("Value")
+ax[0,1].set_ylabel("Density")
+ax[0,1].legend()
+ax[0,1].set_title('Model H2 versus Brass/Brass')
+plt.tight_layout()
+
+df_bb_h2 = scores[((scores['Hypothesis']==0) & (scores['Material1']=='Nickel') & (scores['Material2']=='Brass'))|
+    ((scores['Hypothesis']==0) & (scores['Material2']=='Nickel') & (scores['Material1']=='Brass'))]
+df_bb_h2['pct'] = df_bb_h2['Matching Cells']/df_bb_h2['Total Cells']
+sns.histplot(data=sample_h2, x="pct", binwidth=0.002, kde=False, stat="density", color='red', ax=ax[1,0])
+sns.histplot(data=df_bb_h2, x="pct", binwidth=0.002, kde=False, stat="density", color='green', ax=ax[1,0])
+ax[1,0].set_xlabel("Value")
+ax[1,0].set_ylabel("Density")
+ax[1,0].legend()
+ax[1,0].set_title('Model H2 versus Nickel/Brass')
+plt.tight_layout()
 
 df_bb_h2 = scores[(scores['Hypothesis']==0)]
 df_bb_h2['pct'] = df_bb_h2['Matching Cells']/df_bb_h2['Total Cells']
-sample_h2 = pd.DataFrame(sample_h2, columns=['pct'])
-sns.histplot(data=sample_h2, x="pct", binwidth=0.002, kde=False, stat="density", ax=ax, color='red')
-sns.histplot(data=df_bb_h2, x="pct", binwidth=0.002, kde=False, stat="density", ax=ax, color='green')
-ax.set_xlabel("Value")
-ax.set_ylabel("Density")
-ax.legend()
-ax.set_title('Model H2 versus alles')
+sns.histplot(data=sample_h2, x="pct", binwidth=0.002, kde=False, stat="density", color='red', ax=ax[1,1])
+sns.histplot(data=df_bb_h2, x="pct", binwidth=0.002, kde=False, stat="density", color='green', ax=ax[1,1])
+ax[1,1].set_xlabel("Value")
+ax[1,1].set_ylabel("Density")
+ax[1,1].legend()
+ax[1,1].set_title('Model H2 versus alles')
 plt.tight_layout()
 
 plt.show()
