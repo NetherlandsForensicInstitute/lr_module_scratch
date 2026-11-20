@@ -48,7 +48,7 @@ def transform_marktype_cmc_minus_one(original_score: np.ndarray) -> np.ndarray:
     transformed_score = original_score - 1
     if (transformed_score<0).any():
         Warning('Negative count obtained after transformation: set to 0.')
-        transformed_score[transformed_score < 0] = int(0)
+        transformed_score[transformed_score < 0] = 0
     return transformed_score
 
 
