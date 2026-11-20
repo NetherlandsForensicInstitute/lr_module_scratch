@@ -39,6 +39,19 @@ def transform_marktype_rel_cmc(original_score: np.ndarray) -> np.ndarray:
     return cmc / n
 
 
+def transform_marktype_cmc_minus_one(original_score: np.ndarray) -> np.ndarray:
+    """Transform the two CMC variables by subtracting 1.
+
+    For some traces, it was observed that 0 CMC's was never present in the data; this does not match with a binomial
+    model. As a first attempt to make the data more binomial-like, we subtract 1 from both CMC and N.
+    """
+    transformed_score = original_score - 1
+    if (transformed_score<0).any():
+        Warning('Negative count obtained after transformation: set to 0.')
+        transformed_score[transformed_score < 0] = int(0)
+    return transformed_score
+
+
 class FullFitLRSystem(Aggregation):
     def report(self, data: AggregationData) -> None:
         """Fit the LR-system on all available data."""

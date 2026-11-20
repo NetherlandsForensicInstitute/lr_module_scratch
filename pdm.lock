@@ -4,8 +4,8 @@
 [metadata]
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
-lock_version = "4.5.0"
-content_hash = "sha256:73208d68dd141ef30ee580091ce85a941953f77af24de7c6e8e6e51a2d37486d"
+lock_version = "4.5.1"
+content_hash = "sha256:0f968b4fac2c9f8ac8c9501405a643673c332c810ffba79bcdd1a750295bc6b7"
 
 [[metadata.targets]]
 requires_python = ">=3.13,<3.14"
@@ -515,8 +515,11 @@ files = [
 
 [[package]]
 name = "lir"
-version = "1.9.1"
+version = "1.9.2.dev6"
 requires_python = "<3.15,>=3.12"
+git = "https://github.com/NetherlandsForensicInstitute/lir.git"
+ref = "main"
+revision = "7464dcc00a1bb60a98a0e8b53526c34a7295f708"
 summary = "Package for optimising and evaluating Likelihood Ratio (LR) systems."
 groups = ["default"]
 dependencies = [
@@ -533,9 +536,6 @@ dependencies = [
     "scikit-learn>=1.2",
     "scipy>=1.13.1",
     "tqdm>=4.67.1",
-]
-files = [
-    {file = "lir-1.9.1-py3-none-any.whl", hash = "sha256:90a9410aac06ee2146d9d878deea2625df7aeceeccb93d19901a09ff47cd7955"},
 ]
 
 [[package]]
@@ -1160,6 +1160,22 @@ files = [
     {file = "scipy-1.18.1-cp313-cp313-win_amd64.whl", hash = "sha256:559ed65f60c1af5a03f3912605a1b5114f522c7c32fb23c3376ae8f03219fe28"},
     {file = "scipy-1.18.1-cp313-cp313-win_arm64.whl", hash = "sha256:cd479fc04dd9401e3b4f49e76518768ef99c4f517a98c284eb091fd725719adf"},
     {file = "scipy-1.18.1.tar.gz", hash = "sha256:52c4b7422442aba924d03ad4019852b08a92e64ea187b933135687bfe2747307"},
+]
+
+[[package]]
+name = "seaborn"
+version = "0.13.2"
+requires_python = ">=3.8"
+summary = "Statistical data visualization"
+groups = ["default"]
+dependencies = [
+    "matplotlib!=3.6.1,>=3.4",
+    "numpy!=1.24.0,>=1.20",
+    "pandas>=1.2",
+]
+files = [
+    {file = "seaborn-0.13.2-py3-none-any.whl", hash = "sha256:636f8336facf092165e27924f223d3c62ca560b1f2bb5dff7ab7fad265361987"},
+    {file = "seaborn-0.13.2.tar.gz", hash = "sha256:93e60a40988f4d65e9f4885df477e2fdaff6b73a9ded434c1ab356dd57eefff7"},
 ]
 
 [[package]]

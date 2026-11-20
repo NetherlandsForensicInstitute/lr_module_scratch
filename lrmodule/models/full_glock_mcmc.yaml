@@ -1,0 +1,79 @@
+output_path: output/all_glocks_mcmc
+
+input_file_fp: data/2026-Q4/all_glocks/firing_pin_impression.csv
+input_file_bf: data/2026-Q4/all_glocks/breech_face_impression.csv
+
+##################
+# Data providers #
+##################
+
+data:
+  method: parse_features_from_csv_file
+  file:
+  hypothesis_column: Hypothesis
+  source_id_column:
+    - Weapon1
+    - Weapon2
+  feature_columns:
+    - Matching Cells
+    - Total Cells
+  extra_fields:
+    - Material1
+    - Material2
+
+data_parameters:
+  - path: training.file
+    options:
+      - option_name: fp
+        value: ${input_file_fp}
+      - option_name: bf
+        value: ${input_file_bf}
+
+##############
+# LR systems #
+##############
+
+lrsystem:
+  architecture: binary_lrsystem
+  modules:
+    steps:
+      validate_data: validate_feature_data_type
+      transform:
+        method: lrmodule.helpers.transform_marktype_cmc_minus_one
+      mcmc:
+        method: mcmc
+        include_parameter_outputs: True
+        distribution_h1: betabinomial
+        parameters_h1:
+          alpha:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+          beta:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+        distribution_h2: binomial
+        parameters_h2:
+          p:
+            prior: beta
+            alpha: 0.5
+            beta: 0.5
+        interval:
+          - 0.05
+          - 0.95
+      bounder: iv_bounder
+
+###############
+# Experiments #
+###############
+
+experiments:
+  - name: cmc_minus_one
+    strategy: grid
+    lrsystem: ${lrsystem}
+    data:
+      setup: inference
+      training: ${data}
+    data_parameters: ${data_parameters}
+    output:

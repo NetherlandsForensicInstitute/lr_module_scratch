@@ -13,9 +13,10 @@ readme = "README.md"
 license = {text = "Apache Software License 2.0"}
 
 dependencies = [
-    "lir==1.9.1",
+    "lir @ git+https://github.com/NetherlandsForensicInstitute/lir.git@main",
     "pandas",
     "pytest-randomly",
+    "seaborn>=0.13.2",
 ]
 
 [project.urls]
