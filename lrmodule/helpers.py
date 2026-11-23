@@ -46,9 +46,9 @@ def transform_marktype_cmc_minus_one(original_score: np.ndarray) -> np.ndarray:
     model. As a first attempt to make the data more binomial-like, we subtract 1 from both CMC and N.
     """
     transformed_score = original_score - 1
-    if (transformed_score<0).any():
-        raise Warning('Negative count obtained after transformation: set to 0.')
+    if (transformed_score < 0).any():
         transformed_score[transformed_score < 0] = 0
+        raise Warning("Negative count obtained after transformation: set to 0.")
     return transformed_score
 
 
