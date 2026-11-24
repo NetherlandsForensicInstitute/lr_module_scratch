@@ -6,6 +6,7 @@ import numpy as np
 from lir import Transformer
 from lir.config.base import ConfigValue, check_is_empty, config_parser, pop_field
 from lir.data.models import InstanceData
+from lir.util import check_type
 
 LOG = logging.getLogger(__name__)
 
@@ -51,6 +52,84 @@ class SourcePairRepeatFilter(Transformer):
             return instances[mask]
         else:
             return instances
+
+
+class PairDirectionFilter(Transformer):
+    """
+    Filter that keeps a single direction for each unordered source pair.
+
+    When the data contains a comparison in both directions, i.e. a row for pair (A, B) and a
+    row for pair (B, A), this filter keeps exactly one of the two rows, based on the direction
+    rule:
+
+    - ``smallest_first``: keep the row of which the first source has the lowest value in ``column``;
+    - ``largest_first``: keep the row of which the first source has the highest value in ``column``.
+
+    The value in ``column`` is taken from the features matrix, by resolving the column name against
+    ``feature_columns``. Rows of which the value is tied between the two directions keep the first
+    occurring row, so that both rules select the same row for that pair.
+    Pairs that occur only once are kept as-is, since there is no direction to choose.
+    """
+
+    def __init__(self, feature_columns: list[str], column: str, direction: str):
+        if direction not in ("smallest_first", "largest_first"):
+            raise ValueError(f"unknown direction: {direction}")
+        if column not in feature_columns:
+            raise ValueError(f"column {column} not found in feature_columns: {feature_columns}")
+        self._column_index = feature_columns.index(column)
+        self.direction = direction
+
+    def apply[DataType: InstanceData](self, instances: DataType) -> DataType:
+        """
+        Apply the direction filter to a dataset.
+
+        Parameters
+        ----------
+        instances : InstanceData
+            The dataset to filter. Requires two-column ``source_ids``.
+
+        Returns
+        -------
+        InstanceData
+            A dataset with one row per unordered source pair.
+        """
+        source_ids = check_type(np.ndarray, instances.source_ids, "source_ids are required to filter on pair direction")
+        if len(source_ids.shape) != 2:  # noqa: PLR2004
+            raise ValueError("Two-column source_ids are required to filter on pair direction.")
+
+        features = check_type(np.ndarray, getattr(instances, "features", None))
+        values = features[:, self._column_index]
+
+        sorted_pairs = np.sort(source_ids, axis=1)
+        keys = sorted_pairs[:, 0] + "|" + sorted_pairs[:, 1]
+
+        order = np.argsort(keys, kind="stable")
+        sorted_keys = keys[order]
+        boundaries = np.append(np.flatnonzero(sorted_keys[1:] != sorted_keys[:-1]) + 1, len(keys))
+
+        keep = np.zeros(len(instances), dtype=bool)
+        n_single = 0
+        start = 0
+        for end in boundaries:
+            positions = order[start:end]
+            if len(positions) > 1:
+                if self.direction == "smallest_first":
+                    selected = positions[np.argmin(values[positions])]
+                else:
+                    selected = positions[np.argmax(values[positions])]
+                keep[selected] = True
+            else:
+                keep[positions[0]] = True
+                n_single += 1
+            start = end
+
+        if n_single:
+            LOG.warning(
+                "PairDirectionFilter: %s of %s source pairs occurred in a single direction and were kept as-is.",
+                n_single,
+                len(boundaries),
+            )
+        return instances[keep]
 
 
 class ContentFilter(Transformer):
