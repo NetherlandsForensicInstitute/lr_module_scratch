@@ -1,7 +1,8 @@
-output_path: output/all_glocks_mcmc
+output_path: output/all_types_independence
 
-input_file_fp: data/2026-Q4/all_glocks/firing_pin_impression_75um.csv
-input_file_bf: data/2026-Q4/all_glocks/breech_face_impression.csv
+input_file_fp: data/2026-Q4/all_types/firing_pin_impression.csv
+input_file_bf: data/2026-Q4/all_types/breech_face_impression.csv
+input_file_as: data/2026-Q4/all_types/aperture_shear.csv
 
 ##################
 # Data providers #
@@ -39,39 +40,12 @@ data_bf:
 # LR systems #
 ##############
 
-lrsystem_fp:
+lrsystem_cmc:
   architecture: binary_lrsystem
   modules:
-    steps:
-      validate_data: validate_feature_data_type
-      transform:
-        method: lrmodule.helpers.transform_marktype_cmc_minus_one
-      mcmc:
-        method: mcmc
-        include_parameter_outputs: True
-        distribution_h1: betabinomial
-        parameters_h1:
-          alpha:
-            prior: uniform
-            lower: 0.01
-            upper: 100
-          beta:
-            prior: uniform
-            lower: 0.01
-            upper: 100
-        distribution_h2: binomial
-        parameters_h2:
-          p:
-            prior: beta
-            alpha: 0.5
-            beta: 0.5
-        interval:
-          - 0.05
-          - 0.95
-
-lrsystem_bf:
-  architecture: binary_lrsystem
-  modules:
+    method: logging_pipeline
+    include_fields:
+      - source_ids
     steps:
       validate_data: validate_feature_data_type
       mcmc:
@@ -96,21 +70,24 @@ lrsystem_bf:
         interval:
           - 0.05
           - 0.95
+      bounder: iv_bounder
 
 ###############
 # Experiments #
 ###############
 
 experiments:
-  - name: fp_cmc_minus_one
+  - name: fp_cmc
     strategy: single_run
-    lrsystem: ${lrsystem_fp}
+    lrsystem: ${lrsystem_cmc}
     data:
       setup: inference
       training: ${data_fp}
+      inference: ${data_fp}
   - name: bf_cmc
     strategy: single_run
-    lrsystem: ${lrsystem_bf}
+    lrsystem: ${lrsystem_cmc}
     data:
       setup: inference
       training: ${data_bf}
+      inference: ${data_bf}
