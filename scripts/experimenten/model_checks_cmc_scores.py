@@ -11,6 +11,9 @@ rng = np.random.default_rng()
 bin_width_h1 = 0.01
 bin_width_h2 = 0.002
 
+#  .../lr_module_scratch/ has to be the working directory further on
+# it is assumed that full_glock_mcmc.yaml has been run using lir
+
 bf_path = "output/all_glocks_mcmc/bf_cmc/mcmc_output/"
 fp_path = "output/all_glocks_mcmc/fp_cmc_minus_one/mcmc_output/"
 
@@ -47,7 +50,13 @@ bf_total_cells_h2 = bf_scores[bf_scores["Hypothesis"] == 0]["Total Cells"].to_nu
 fp_total_cells_h1 = fp_scores[fp_scores["Hypothesis"] == 1]["Total Cells"].to_numpy()
 fp_total_cells_h2 = fp_scores[fp_scores["Hypothesis"] == 0]["Total Cells"].to_numpy()
 
-
+# comparison takes place of new observed relative cmc values to values corresponding to the probability model
+# for breech face this means the following:
+# the mcmc procedure rendered a trace of values for either alpha and beta (H1) or the success parameter p (H2)
+# we cannot directly compare these to the observed relative cmc values
+# therefore we take new samples of success parameters (under H1) or we have them already (under H2)
+# and given these, we take samples of simulated cmc scores, which in turn we divide by the corresponding number
+# of total cells
 def sample_fraction_cmc_bf(total_cells, probs):
     sample = rng.binomial(total_cells, probs) / total_cells
     sample = sample.ravel()
@@ -55,7 +64,8 @@ def sample_fraction_cmc_bf(total_cells, probs):
 
     return sample
 
-
+# we basically do the same here, but since firing pin yields no values of zero, we sample from the
+# distribution of outcomes minus 1, and then after that again add 1
 def sample_fraction_cmc_fp(total_cells, probs):
     sample = (rng.binomial(total_cells, probs) + 1) / (total_cells + 1)
     sample = sample.ravel()
