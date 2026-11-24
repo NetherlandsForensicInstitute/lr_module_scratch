@@ -36,6 +36,21 @@ data_bf:
     - Material1
     - Material2
 
+data_as:
+  method: parse_features_from_csv_file
+  file: ${input_file_as}
+  hypothesis_column: Hypothesis
+  source_id_column:
+    - Weapon1
+    - Weapon2
+  feature_columns:
+    - Score
+  extra_fields:
+    - Material1
+    - Material2
+    - Type1
+    - Type2
+
 ##############
 # LR systems #
 ##############
@@ -72,6 +87,30 @@ lrsystem_cmc:
           - 0.95
       bounder: iv_bounder
 
+aperture_shear_ccf_lrsystem: &aperture_shear_ccf_lrsystem
+  architecture: binary_lrsystem
+  modules:
+    method: logging_pipeline
+    include_fields:
+      - source_ids
+    steps:
+      validate_data: validate_feature_data_type
+      transform:
+        method: lrmodule.helpers.transform_marktype_ccf
+      bootstrap:
+        method: bootstrap
+        n_bootstraps: 2
+        seed: 0
+        points: equidistant
+        n_points: 100
+        steps:
+          kde:
+            method: kde
+            bandwidth:
+              - 0.05  # KNM kernel size
+              - 0.23  # KM kernel size
+          elub: iv_bounder
+
 ###############
 # Experiments #
 ###############
@@ -91,3 +130,10 @@ experiments:
       setup: inference
       training: ${data_bf}
       inference: ${data_bf}
+  - name: as_ccf
+    strategy: single_run
+    lrsystem: ${aperture_shear_ccf_lrsystem}
+    data:
+      setup: inference
+      training: ${data_as}
+      inference: ${data_as}
