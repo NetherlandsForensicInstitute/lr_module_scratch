@@ -1,0 +1,169 @@
+# Comparison of the 75 µm firing pin data with the normal (25 µm) firing pin data.
+#
+# The 75 µm data sets are only available for the firing pin impression: the breech face and
+# aperture shear marks were scanned at normal resolution only. The comparison is therefore
+# defined in this folder, and repeated on two data sets, in two separate experiments:
+#
+# * `all_glocks`: the 75 µm run uses the dedicated Glock data set. No 25 µm firing pin data is
+#   available for that data set, so the 25 µm run uses the Glock subset (type 125b) of the
+#   `all_types` data set instead. Note that the dedicated Glock data set contains far more
+#   comparisons, so differences between the runs reflect both the resolution and the data set.
+# * `all_types`: the 75 µm and 25 µm files contain the same pairs, so this experiment isolates
+#   the effect of the scanning resolution.
+#
+# In both experiments the model is trained and evaluated with 3-fold cross-validation over
+# source pairs, and the runs are compared on the same metrics and plots.
+output_path: output/${timestamp}_firing_pin_impression_75um_vs_25um
+input_file_75um_all_glocks: data/2026-Q4/all_glocks/firing_pin_impression_75um.csv
+input_file_75um_all_types: data/2026-Q4/all_types/firing_pin_impression_75um.csv
+input_file_25um_all_types: data/2026-Q4/all_types/firing_pin_impression.csv
+
+lrsystem: &firing_pin_cmc_lrsystem
+  architecture: binary_lrsystem
+  modules:
+    # Log the source ids together with the pipeline results, so that each LLR can be traced back to a pair.
+    method: logging_pipeline
+    include_fields:
+      - source_ids
+    steps:
+      # Ensure that the model can only be used on input data of the same type and dimensions as the training data.
+      validate_data: validate_feature_data_type
+      mcmc:
+        method: mcmc
+        # Save plots and csv files of the sampled posterior distributions of the model parameters.
+        include_parameter_outputs: True
+        # H1 (same source): beta-binomial distribution for the matching-cell count.
+        distribution_h1: betabinomial
+        parameters_h1:
+          alpha:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+          beta:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+        # H2 (different sources): binomial distribution for the matching-cell count.
+        distribution_h2: binomial
+        parameters_h2:
+          p:
+            prior: beta
+            alpha: 0.5
+            beta: 0.5
+        # Quantiles of the credible interval around the median LLR.
+        interval:
+          - 0.05
+          - 0.95
+      # Bound the LLRs using the Invariance Verification method.
+      bounder: iv_bounder
+
+cmc_data_provider: &cmc_data_provider
+  method: parse_features_from_csv_file
+  file: ${input_file_25um_all_types}
+  hypothesis_column: Hypothesis
+  source_id_column:
+    - Weapon1
+    - Weapon2
+  feature_columns:
+    - Matching Cells
+    - Total Cells
+  extra_fields:
+    - Type1
+    - Type2
+
+filter_glock_pairs:
+  # Filter to only include comparisons between two Glock firearms (type 125b).
+  method: lrmodule.content_filter.parse_content_filter
+  condition:
+    type: and
+    conditions:
+      - type: columns_equal
+        column1: Type1
+        column2: Type2
+      - type: equals
+        column: Type1
+        value: 125b
+
+data_splits:
+  strategy: lrmodule.input_data.CrossValidationPairs
+  folds: 3
+  random_state: 0
+
+outputs: &comparison_outputs
+  - method: metrics_csv
+    columns:
+      - cllr
+      - cllr_min
+      - devpav
+      - lrmodule.metrics.count
+      - lrmodule.metrics.count_h1
+      - lrmodule.metrics.count_h2
+      - lrmodule.metrics.mean_llr_h1
+      - lrmodule.metrics.mean_llr_h2
+  - method: metrics_bars
+    metrics:
+      - cllr
+      - cllr_min
+    plot_params:
+      xlim:
+        - 0
+        - 1
+  - pav
+  - ece
+  - lr_histogram
+  - llr_interval
+  - tippett
+
+experiments:
+  - name: all_glocks
+    strategy: grid
+    lrsystem: *firing_pin_cmc_lrsystem
+    data:
+      setup: splits
+      provider: *cmc_data_provider
+      filter:
+        method: pipeline
+        steps:
+          filter_glock_pairs:
+          write_csv:
+            method: csv_writer
+            path: data_after_filter.csv
+      splits: ${data_splits}
+    data_parameters:
+      - name: resolution
+        options:
+          # The dedicated Glock data set contains only Glock pairs, so no filter is needed.
+          - option_name: 75um
+            substitutions:
+              - path: provider.file
+                value: ${input_file_75um_all_glocks}
+              - path: filter.steps.filter_glock_pairs
+                value: identity
+          # The 25 µm counterpart of the Glock data is the Glock subset of the `all_types` data set.
+          - option_name: 25um
+            substitutions:
+              - path: provider.file
+                value: ${input_file_25um_all_types}
+              - path: filter.steps.filter_glock_pairs
+                value: ${filter_glock_pairs}
+    output: *comparison_outputs
+
+  - name: all_types
+    strategy: grid
+    lrsystem: *firing_pin_cmc_lrsystem
+    data:
+      setup: splits
+      provider: *cmc_data_provider
+      splits: ${data_splits}
+    data_parameters:
+      - name: resolution
+        options:
+          - option_name: 75um
+            substitutions:
+              - path: provider.file
+                value: ${input_file_75um_all_types}
+          - option_name: 25um
+            substitutions:
+              - path: provider.file
+                value: ${input_file_25um_all_types}
+    output: *comparison_outputs
