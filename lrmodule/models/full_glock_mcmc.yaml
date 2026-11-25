@@ -1,6 +1,6 @@
 output_path: output/all_glocks_mcmc
 
-input_file_fp: data/2026-Q4/all_glocks/firing_pin_impression.csv
+input_file_fp: data/2026-Q4/all_glocks/firing_pin_impression_75um.csv
 input_file_bf: data/2026-Q4/all_glocks/breech_face_impression.csv
 
 ##################
@@ -68,7 +68,6 @@ lrsystem_fp:
         interval:
           - 0.05
           - 0.95
-      bounder: iv_bounder
 
 lrsystem_bf:
   architecture: binary_lrsystem
@@ -97,7 +96,6 @@ lrsystem_bf:
         interval:
           - 0.05
           - 0.95
-      bounder: iv_bounder
 
 ###############
 # Experiments #
