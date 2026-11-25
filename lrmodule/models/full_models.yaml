@@ -18,6 +18,20 @@ input_file_as: data/2026-Q4/all_types/aperture_shear.csv
 input_file_bf: data/2026-Q4/all_types/breech_face_impression.csv
 input_file_fp: data/2026-Q4/all_types/firing_pin_impression.csv
 
+filter:
+  method: pipeline
+  steps:
+    content_filter:
+      method: lrmodule.content_filter.parse_content_filter
+      condition:
+        type: columns_equal
+        column1: Type1
+        column2: Type2
+
+    source_repeat_filter:
+      method: lrmodule.content_filter.SourcePairRepeatFilter
+      repeat: 1
+
 ##################
 # Data providers #
 ##################
@@ -31,6 +45,9 @@ as_data:
     - Weapon2
   feature_columns:
     - Score
+  extra_fields:
+    - Type1
+    - Type2
 
 bf_data:
   method: parse_features_from_csv_file
@@ -42,7 +59,9 @@ bf_data:
   feature_columns:
     - Matching Cells
     - Total Cells
-
+  extra_fields:
+    - Type1
+    - Type2
 fp_data:
   method: parse_features_from_csv_file
   file: ${input_file_fp}
@@ -53,6 +72,9 @@ fp_data:
   feature_columns:
     - Matching Cells
     - Total Cells
+  extra_fields:
+    - Type1
+    - Type2
 
 # 3-fold cross-validation over source pairs, shared by all experiments.
 data_splits:
@@ -248,6 +270,8 @@ experiments:
       setup: splits
       provider: ${as_data}
       splits: ${data_splits}
+      filter: ${filter}
+
     output: ${as_outputs}
 
   - name: breech_face_impression
@@ -257,6 +281,8 @@ experiments:
       setup: splits
       provider: ${bf_data}
       splits: ${data_splits}
+      filter: ${filter}
+
     output: ${bf_outputs}
 
   - name: firing_pin_impression
@@ -266,4 +292,6 @@ experiments:
       setup: splits
       provider: ${fp_data}
       splits: ${data_splits}
+      filter: ${filter}
+
     output: ${fp_outputs}
