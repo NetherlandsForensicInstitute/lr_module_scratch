@@ -26,4 +26,8 @@ as_lrs = pd.read_csv(as_lrs_path)
 output_folder = Path("output/all_types_independence")
 output_folder.mkdir(exist_ok=True)
 
+bf_fp_scores_merged = pd.merge(bf_scores, fp_scores, on=['Weapon1', 'Weapon2'], how='inner')
+bf_as_scores_merged = pd.merge(bf_scores, as_scores, on=['Weapon1', 'Weapon2'], how='inner')
+fp_as_scores_merged = pd.merge(fp_scores, as_scores, on=['Weapon1', 'Weapon2'], how='inner')
+
 a = 1
