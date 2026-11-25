@@ -1,0 +1,297 @@
+# Full LR models for all mark types on the `all_types` data set (2026-Q4).
+#
+# This file contains the full model for each of the three mark types, as one experiment per mark type. The results
+# for each mark type are written to a subdirectory named after the experiment.
+#
+# - aperture shear: quantified by a single CCF score. This score is transformed to the log-odds scale, after which
+#   the LR is estimated with a KDE calibrator. A bootstrap procedure provides confidence intervals around the LLRs.
+# - breech face impression and firing pin impression: quantified by the number of matching cells out of the total
+#   number of cells. Under H1 (same source), the matching-cell count is modeled with a beta-binomial distribution;
+#   under H2 (different sources), a binomial distribution is used. The model parameters are inferred with MCMC,
+#   which also yields credible intervals around the LLRs.
+#
+# In all cases the LLRs are bounded with the Invariance Verification method, and the performance of the model is
+# assessed with 3-fold cross-validation over source pairs, after which the model is saved for application in casework.
+output_path: output/${timestamp}_full_models
+
+input_file_as: data/2026-Q4/all_types/aperture_shear.csv
+input_file_bf: data/2026-Q4/all_types/breech_face_impression.csv
+input_file_fp: data/2026-Q4/all_types/firing_pin_impression.csv
+
+filter:
+  method: pipeline
+  steps:
+    content_filter:
+      method: lrmodule.content_filter.parse_content_filter
+      condition:
+        type: columns_equal
+        column1: Type1
+        column2: Type2
+
+    source_repeat_filter:
+      method: lrmodule.content_filter.SourcePairRepeatFilter
+      repeat: 1
+
+##################
+# Data providers #
+##################
+
+as_data:
+  method: parse_features_from_csv_file
+  file: ${input_file_as}
+  hypothesis_column: Hypothesis
+  source_id_column:
+    - Weapon1
+    - Weapon2
+  feature_columns:
+    - Score
+  extra_fields:
+    - Type1
+    - Type2
+
+bf_data:
+  method: parse_features_from_csv_file
+  file: ${input_file_bf}
+  hypothesis_column: Hypothesis
+  source_id_column:
+    - Weapon1
+    - Weapon2
+  feature_columns:
+    - Matching Cells
+    - Total Cells
+  extra_fields:
+    - Type1
+    - Type2
+fp_data:
+  method: parse_features_from_csv_file
+  file: ${input_file_fp}
+  hypothesis_column: Hypothesis
+  source_id_column:
+    - Weapon1
+    - Weapon2
+  feature_columns:
+    - Matching Cells
+    - Total Cells
+  extra_fields:
+    - Type1
+    - Type2
+
+# 3-fold cross-validation over source pairs, shared by all experiments.
+data_splits:
+  strategy: lrmodule.input_data.CrossValidationPairs
+  folds: 3
+  random_state: 0
+
+##############
+# LR systems #
+##############
+
+as_lrsystem:
+  architecture: binary_lrsystem
+  modules:
+    # Log the source ids together with the pipeline results, so that each LLR can be traced back to a pair.
+    method: logging_pipeline
+    include_fields:
+      - source_ids
+    steps:
+      # Ensure that the model can only be used on input data of the same type and dimensions as the training data.
+      validate_data: validate_feature_data_type
+      # Transform the CCF score from [-1, 1] to the log10-odds scale.
+      transform:
+        method: lrmodule.helpers.transform_marktype_ccf
+      bootstrap:
+        method: bootstrap
+        n_bootstraps: 25
+        seed: 0
+        points: equidistant
+        n_points: 1000 # number of equidistant points at which the intervals are interpolated
+        steps:
+          kde:
+            method: kde
+            bandwidth:
+              - 0.05 # KNM kernel size
+              - 0.23 # KM kernel size
+          # Bound the LLRs using the Invariance Verification method.
+          bounder: iv_bounder
+
+bf_lrsystem:
+  architecture: binary_lrsystem
+  modules:
+    # Log the source ids together with the pipeline results, so that each LLR can be traced back to a pair.
+    method: logging_pipeline
+    include_fields:
+      - source_ids
+    steps:
+      # Ensure that the model can only be used on input data of the same type and dimensions as the training data.
+      validate_data: validate_feature_data_type
+      mcmc:
+        method: mcmc
+        # Save plots and csv files of the sampled posterior distributions of the model parameters.
+        include_parameter_outputs: True
+        # H1 (same source): beta-binomial distribution for the matching-cell count.
+        distribution_h1: betabinomial
+        parameters_h1:
+          alpha:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+          beta:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+        # H2 (different sources): binomial distribution for the matching-cell count.
+        distribution_h2: binomial
+        parameters_h2:
+          p:
+            prior: beta
+            alpha: 0.5
+            beta: 0.5
+        # Quantiles of the credible interval around the median LLR.
+        interval:
+          - 0.05
+          - 0.95
+      # Bound the LLRs using the Invariance Verification method.
+      bounder: iv_bounder
+
+fp_lrsystem:
+  architecture: binary_lrsystem
+  modules:
+    # Log the source ids together with the pipeline results, so that each LLR can be traced back to a pair.
+    method: logging_pipeline
+    include_fields:
+      - source_ids
+    steps:
+      # Ensure that the model can only be used on input data of the same type and dimensions as the training data.
+      validate_data: validate_feature_data_type
+      mcmc:
+        method: mcmc
+        # Save plots and csv files of the sampled posterior distributions of the model parameters.
+        include_parameter_outputs: True
+        # H1 (same source): beta-binomial distribution for the matching-cell count.
+        distribution_h1: betabinomial
+        parameters_h1:
+          alpha:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+          beta:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+        # H2 (different sources): binomial distribution for the matching-cell count.
+        distribution_h2: binomial
+        parameters_h2:
+          p:
+            prior: beta
+            alpha: 0.5
+            beta: 0.5
+        # Quantiles of the credible interval around the median LLR.
+        interval:
+          - 0.05
+          - 0.95
+      # Bound the LLRs using the Invariance Verification method.
+      bounder: iv_bounder
+
+###########
+# Outputs #
+###########
+
+# The output lists are identical except for the input data they copy along with the results.
+
+as_outputs:
+  - method: metrics
+    columns:
+      - cllr
+      - cllr_min
+      - devpav
+  # Store the input data with the model results, so that the model can be traced back to its data.
+  - method: lrmodule.copy_csv.copy_csv
+    file: ${input_file_as}
+    new_file_name: reference_data.csv
+  - pav
+  - ece
+  - lr_histogram
+  - llr_interval
+  - nbe
+  - invariance_delta_function
+  - tippett
+  - llr_overestimation
+  - save_model
+
+bf_outputs:
+  - method: metrics
+    columns:
+      - cllr
+      - cllr_min
+      - devpav
+  # Store the input data with the model results, so that the model can be traced back to its data.
+  - method: lrmodule.copy_csv.copy_csv
+    file: ${input_file_bf}
+    new_file_name: reference_data.csv
+  - pav
+  - ece
+  - lr_histogram
+  - llr_interval
+  - nbe
+  - invariance_delta_function
+  - tippett
+  - llr_overestimation
+  - save_model
+
+fp_outputs:
+  - method: metrics
+    columns:
+      - cllr
+      - cllr_min
+      - devpav
+  # Store the input data with the model results, so that the model can be traced back to its data.
+  - method: lrmodule.copy_csv.copy_csv
+    file: ${input_file_fp}
+    new_file_name: reference_data.csv
+  - pav
+  - ece
+  - lr_histogram
+  - llr_interval
+  - nbe
+  - invariance_delta_function
+  - tippett
+  - llr_overestimation
+  - save_model
+
+###############
+# Experiments #
+###############
+
+experiments:
+  - name: aperture_shear
+    strategy: single_run
+    lrsystem: ${as_lrsystem}
+    data:
+      setup: splits
+      provider: ${as_data}
+      splits: ${data_splits}
+      filter: ${filter}
+
+    output: ${as_outputs}
+
+  - name: breech_face_impression
+    strategy: single_run
+    lrsystem: ${bf_lrsystem}
+    data:
+      setup: splits
+      provider: ${bf_data}
+      splits: ${data_splits}
+      filter: ${filter}
+
+    output: ${bf_outputs}
+
+  - name: firing_pin_impression
+    strategy: single_run
+    lrsystem: ${fp_lrsystem}
+    data:
+      setup: splits
+      provider: ${fp_data}
+      splits: ${data_splits}
+      filter: ${filter}
+
+    output: ${fp_outputs}
