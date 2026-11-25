@@ -13,7 +13,7 @@ readme = "README.md"
 license = {text = "Apache Software License 2.0"}
 
 dependencies = [
-    "lir @ git+https://github.com/NetherlandsForensicInstitute/lir.git@main",
+    "lir==1.10",
     "pandas",
     "pytest-randomly",
     "seaborn>=0.13.2",
