@@ -59,7 +59,7 @@ lrsystem: &firing_pin_cmc_lrsystem
 
 cmc_data_provider: &cmc_data_provider
   method: parse_features_from_csv_file
-  file: ${input_file_25um_all_types}
+  file: 
   hypothesis_column: Hypothesis
   source_id_column:
     - Weapon1
@@ -71,18 +71,25 @@ cmc_data_provider: &cmc_data_provider
     - Type1
     - Type2
 
-filter_glock_pairs:
-  # Filter to only include comparisons between two Glock firearms (type 125b).
-  method: lrmodule.content_filter.parse_content_filter
-  condition:
-    type: and
-    conditions:
-      - type: columns_equal
-        column1: Type1
-        column2: Type2
-      - type: equals
-        column: Type1
-        value: 125b
+general_filter:
+  # Filter to only include comparisons between two Glock firearms (type 125b),
+  # and the first occurence.
+  method: pipeline
+  steps:
+    source_repeat_filter:
+      method: lrmodule.content_filter.SourcePairRepeatFilter
+      repeat: 1
+    glock_filter:
+      method: lrmodule.content_filter.parse_content_filter
+      condition:
+        type: and
+        conditions:
+          - type: columns_equal
+            column1: Type1
+            column2: Type2
+          - type: equals
+            column: Type1
+            value: 125b
 
 data_splits:
   strategy: lrmodule.input_data.CrossValidationPairs
@@ -105,7 +112,7 @@ outputs: &comparison_outputs
       - cllr
       - cllr_min
     plot_params:
-      xlim:
+      ylim:
         - 0
         - 1
   - pav
@@ -124,7 +131,7 @@ experiments:
       filter:
         method: pipeline
         steps:
-          filter_glock_pairs:
+          general_filter: ${general_filter}
           write_csv:
             method: csv_writer
             path: data_after_filter.csv
@@ -137,15 +144,11 @@ experiments:
             substitutions:
               - path: provider.file
                 value: ${input_file_75um_all_glocks}
-              - path: filter.steps.filter_glock_pairs
-                value: identity
           # The 25 µm counterpart of the Glock data is the Glock subset of the `all_types` data set.
           - option_name: 25um
             substitutions:
               - path: provider.file
                 value: ${input_file_25um_all_types}
-              - path: filter.steps.filter_glock_pairs
-                value: ${filter_glock_pairs}
     output: *comparison_outputs
 
   - name: all_types
