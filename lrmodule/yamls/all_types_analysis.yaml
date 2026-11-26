@@ -1,0 +1,167 @@
+output_path: output/all_types_independence_filtered
+
+input_file_fp: data/2026-Q4/all_types/firing_pin_impression.csv
+input_file_bf: data/2026-Q4/all_types/breech_face_impression.csv
+input_file_as: data/2026-Q4/all_types/aperture_shear.csv
+
+filter:
+  method: pipeline
+  steps:
+    content_filter:
+      method: lrmodule.content_filter.parse_content_filter
+      condition:
+        type: columns_equal
+        column1: Type1
+        column2: Type2
+
+    source_repeat_filter:
+      method: lrmodule.content_filter.SourcePairRepeatFilter
+      repeat: 1
+
+##################
+# Data providers #
+##################
+
+data_fp:
+  method: parse_features_from_csv_file
+  file: ${input_file_fp}
+  hypothesis_column: Hypothesis
+  source_id_column:
+    - Weapon1
+    - Weapon2
+  feature_columns:
+    - Matching Cells
+    - Total Cells
+  extra_fields:
+    - Material1
+    - Material2
+    - Type1
+    - Type2
+
+data_bf:
+  method: parse_features_from_csv_file
+  file: ${input_file_bf}
+  hypothesis_column: Hypothesis
+  source_id_column:
+    - Weapon1
+    - Weapon2
+  feature_columns:
+    - Matching Cells
+    - Total Cells
+  extra_fields:
+    - Material1
+    - Material2
+    - Type1
+    - Type2
+
+data_as:
+  method: parse_features_from_csv_file
+  file: ${input_file_as}
+  hypothesis_column: Hypothesis
+  source_id_column:
+    - Weapon1
+    - Weapon2
+  feature_columns:
+    - Score
+  extra_fields:
+    - Material1
+    - Material2
+    - Type1
+    - Type2
+
+##############
+# LR systems #
+##############
+
+lrsystem_cmc:
+  architecture: binary_lrsystem
+  modules:
+    method: logging_pipeline
+    include_fields:
+      - source_ids
+      - Material1
+      - Material2
+    steps:
+      validate_data: validate_feature_data_type
+      mcmc:
+        method: mcmc
+        include_parameter_outputs: True
+        distribution_h1: betabinomial
+        parameters_h1:
+          alpha:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+          beta:
+            prior: uniform
+            lower: 0.01
+            upper: 100
+        distribution_h2: binomial
+        parameters_h2:
+          p:
+            prior: beta
+            alpha: 0.5
+            beta: 0.5
+        interval:
+          - 0.05
+          - 0.95
+      bounder: iv_bounder
+
+aperture_shear_ccf_lrsystem: &aperture_shear_ccf_lrsystem
+  architecture: binary_lrsystem
+  modules:
+    method: logging_pipeline
+    include_fields:
+      - source_ids
+      - Material1
+      - Material2
+    steps:
+      validate_data: validate_feature_data_type
+      transform:
+        method: lrmodule.helpers.transform_marktype_ccf
+      bootstrap:
+        method: bootstrap
+        n_bootstraps: 2
+        seed: 0
+        points: equidistant
+        n_points: 100
+        steps:
+          kde:
+            method: kde
+            bandwidth:
+              - 0.05  # KNM kernel size
+              - 0.23  # KM kernel size
+      elub: iv_bounder
+
+###############
+# Experiments #
+###############
+
+experiments:
+  - name: fp_cmc
+    strategy: single_run
+    lrsystem: ${lrsystem_cmc}
+    data:
+      setup: inference
+#      provider: ${data_fp}
+      filter: ${filter}
+      training: ${data_fp}
+      inference: ${data_fp}
+  - name: bf_cmc
+    strategy: single_run
+    lrsystem: ${lrsystem_cmc}
+    data:
+      setup: inference
+#      provider: ${data_fp}
+      filter: ${filter}
+      training: ${data_bf}
+      inference: ${data_bf}
+  - name: as_ccf
+    strategy: single_run
+    lrsystem: ${aperture_shear_ccf_lrsystem}
+    data:
+      setup: inference
+#      provider: ${data_fp}
+      filter: ${filter}
+      training: ${data_as}
+      inference: ${data_as}

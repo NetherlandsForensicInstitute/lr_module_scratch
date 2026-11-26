@@ -42,6 +42,9 @@ data_bf:
 lrsystem_fp:
   architecture: binary_lrsystem
   modules:
+    method: logging_pipeline
+    include_fields:
+      - source_ids
     steps:
       validate_data: validate_feature_data_type
       transform:

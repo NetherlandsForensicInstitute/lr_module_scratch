@@ -4,8 +4,8 @@
 [metadata]
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
-lock_version = "4.5.0"
-content_hash = "sha256:e0f665f128c082dd2d7a799cec1c6e63a48754bd242a18e0520dfc7f7ec705f7"
+lock_version = "4.5.1"
+content_hash = "sha256:0f968b4fac2c9f8ac8c9501405a643673c332c810ffba79bcdd1a750295bc6b7"
 
 [[metadata.targets]]
 requires_python = ">=3.13,<3.14"
@@ -516,8 +516,11 @@ files = [
 
 [[package]]
 name = "lir"
-version = "1.10"
+version = "1.11.dev6"
 requires_python = "<3.15,>=3.12"
+git = "https://github.com/NetherlandsForensicInstitute/lir.git"
+ref = "main"
+revision = "d9db4596cfdd8e33f4eecb2de2b54f0a600f0ea7"
 summary = "Package for optimising and evaluating Likelihood Ratio (LR) systems."
 groups = ["default"]
 dependencies = [
@@ -534,9 +537,6 @@ dependencies = [
     "scikit-learn>=1.2",
     "scipy>=1.13.1",
     "tqdm>=4.67.1",
-]
-files = [
-    {file = "lir-1.10-py3-none-any.whl", hash = "sha256:736cfb0e64216a4d4151b9fdbfa93ac0c7c2a80bc8a9da5260b14dad9e15f2a9"},
 ]
 
 [[package]]
