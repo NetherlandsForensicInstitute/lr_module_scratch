@@ -131,7 +131,7 @@ aperture_shear_ccf_lrsystem: &aperture_shear_ccf_lrsystem
             bandwidth:
               - 0.05  # KNM kernel size
               - 0.23  # KM kernel size
-          elub: iv_bounder
+      elub: iv_bounder
 
 ###############
 # Experiments #
