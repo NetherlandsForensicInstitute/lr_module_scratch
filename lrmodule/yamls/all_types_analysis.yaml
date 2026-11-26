@@ -1,4 +1,4 @@
-output_path: output/all_types_independence
+output_path: output/all_types_independence_filtered
 
 input_file_fp: data/2026-Q4/all_types/firing_pin_impression.csv
 input_file_bf: data/2026-Q4/all_types/breech_face_impression.csv
@@ -35,6 +35,8 @@ data_fp:
   extra_fields:
     - Material1
     - Material2
+    - Type1
+    - Type2
 
 data_bf:
   method: parse_features_from_csv_file
@@ -49,6 +51,8 @@ data_bf:
   extra_fields:
     - Material1
     - Material2
+    - Type1
+    - Type2
 
 data_as:
   method: parse_features_from_csv_file
@@ -75,6 +79,8 @@ lrsystem_cmc:
     method: logging_pipeline
     include_fields:
       - source_ids
+      - Material1
+      - Material2
     steps:
       validate_data: validate_feature_data_type
       mcmc:
@@ -107,6 +113,8 @@ aperture_shear_ccf_lrsystem: &aperture_shear_ccf_lrsystem
     method: logging_pipeline
     include_fields:
       - source_ids
+      - Material1
+      - Material2
     steps:
       validate_data: validate_feature_data_type
       transform:
@@ -139,17 +147,21 @@ experiments:
       filter: ${filter}
       training: ${data_fp}
       inference: ${data_fp}
-#  - name: bf_cmc
-#    strategy: single_run
-#    lrsystem: ${lrsystem_cmc}
-#    data:
-#      setup: inference
-#      training: ${data_bf}
-#      inference: ${data_bf}
-#  - name: as_ccf
-#    strategy: single_run
-#    lrsystem: ${aperture_shear_ccf_lrsystem}
-#    data:
-#      setup: inference
-#      training: ${data_as}
-#      inference: ${data_as}
+  - name: bf_cmc
+    strategy: single_run
+    lrsystem: ${lrsystem_cmc}
+    data:
+      setup: inference
+#      provider: ${data_fp}
+      filter: ${filter}
+      training: ${data_bf}
+      inference: ${data_bf}
+  - name: as_ccf
+    strategy: single_run
+    lrsystem: ${aperture_shear_ccf_lrsystem}
+    data:
+      setup: inference
+#      provider: ${data_fp}
+      filter: ${filter}
+      training: ${data_as}
+      inference: ${data_as}
