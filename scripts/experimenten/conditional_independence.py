@@ -1,12 +1,11 @@
 from pathlib import Path
-
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import seaborn as sns
 
 #  .../lr_module_scratch/ has to be the working directory further on
 
+#  Read score results for all types of traces
 bf_scores_path = "data/2026-Q4/all_types/breech_face_impression.csv"
 fp_scores_path = "data/2026-Q4/all_types/firing_pin_impression.csv"
 as_scores_path = "data/2026-Q4/all_types/aperture_shear.csv"
@@ -15,6 +14,7 @@ bf_scores = pd.read_csv(bf_scores_path)
 fp_scores = pd.read_csv(fp_scores_path)
 as_scores = pd.read_csv(as_scores_path)
 
+#  Read LR results for all types of traces
 bf_lrs_path = "output/all_types_independence_filtered/bf_cmc/modules.csv"
 fp_lrs_path = "output/all_types_independence_filtered/fp_cmc/modules.csv"
 as_lrs_path = "output/all_types_independence_filtered/as_ccf/modules.csv"
@@ -26,91 +26,59 @@ as_lrs = pd.read_csv(as_lrs_path)
 output_folder = Path("output/all_types_independence")
 output_folder.mkdir(exist_ok=True)
 
+#  Merge score results for each pair of types of traces
 bf_fp_scores_merged = pd.merge(bf_scores, fp_scores, on=['Weapon1', 'Weapon2'], how='inner')
 bf_as_scores_merged = pd.merge(bf_scores, as_scores, on=['Weapon1', 'Weapon2'], how='inner')
 fp_as_scores_merged = pd.merge(fp_scores, as_scores, on=['Weapon1', 'Weapon2'], how='inner')
-
+# Add cmc/n column for BF and FP
 bf_fp_scores_merged['cmc/n bf'] = bf_fp_scores_merged['Matching Cells_x']/bf_fp_scores_merged['Total Cells_x']
 bf_fp_scores_merged['cmc/n fp'] = bf_fp_scores_merged['Matching Cells_y']/bf_fp_scores_merged['Total Cells_y']
+bf_as_scores_merged['cmc/n bf'] = bf_as_scores_merged['Matching Cells']/bf_as_scores_merged['Total Cells']
+fp_as_scores_merged['cmc/n fp'] = fp_as_scores_merged['Matching Cells']/fp_as_scores_merged['Total Cells']
 
-# BF versus FP
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
-sns.scatterplot(data=bf_fp_scores_merged[bf_fp_scores_merged['Hypothesis_x'] == 1], x="cmc/n bf", y="cmc/n fp", ax=ax1, color="steelblue", s=10)
-ax1.set_title("Hypothesis 1")
-sns.scatterplot(data=bf_fp_scores_merged[bf_fp_scores_merged['Hypothesis_x'] == 0], x="cmc/n bf", y="cmc/n fp", ax=ax2, color="coral", s=10)
-ax2.set_title("Hypothesis 2")
-plt.tight_layout()
-plt.savefig(f"{output_folder}/{'bf_fp_scores'}", dpi=300)
-# plt.show()
+def plot_conditional_scores(merged_data, name_x, name_y, name_output):
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+    sns.scatterplot(data=merged_data[merged_data['Hypothesis_x'] == 1], x=name_x, y=name_y,
+                    ax=ax1, color="steelblue", s=10)
+    ax1.set_title("Hypothesis 1")
+    sns.scatterplot(data=merged_data[merged_data['Hypothesis_x'] == 0], x=name_x, y=name_y,
+                    ax=ax2, color="coral", s=10)
+    ax2.set_title("Hypothesis 2")
+    plt.tight_layout()
+    plt.savefig(f"{output_folder}/{name_output}", dpi=300)
 
-bf_as_scores_merged['cmc/n bf'] = bf_fp_scores_merged['Matching Cells_x']/bf_fp_scores_merged['Total Cells_x']
+# plot BF versus FP scores under H1 and H2
+plot_conditional_scores(bf_fp_scores_merged, "cmc/n bf", "cmc/n fp", 'bf_fp_scores')
+# plot BF versus AS scores under H1 and H2
+plot_conditional_scores(bf_as_scores_merged, "cmc/n bf", "Score", 'bf_as_scores')
+# plot FP versus AS scores under H1 and H2
+plot_conditional_scores(fp_as_scores_merged, "cmc/n fp", "Score", 'fp_as_scores')
 
-# # BF versus AS
-# fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
-# sns.scatterplot(data=bf_as_scores_merged[bf_as_scores_merged['Hypothesis_x'] == 1], x="cmc/n bf", y="Score", ax=ax1, color="steelblue", s=10)
-# ax1.set_title("Hypothesis 1")
-# sns.scatterplot(data=bf_as_scores_merged[bf_as_scores_merged['Hypothesis_x'] == 0], x="cmc/n bf", y="Score", ax=ax2, color="coral", s=10)
-# ax2.set_title("Hypothesis 2")
-# plt.tight_layout()
-# plt.savefig(f"{output_folder}/{'bf_as_scores'}", dpi=300)
-# # plt.show()
-#
-# fp_as_scores_merged['cmc/n fp'] = fp_as_scores_merged['Matching Cells']/fp_as_scores_merged['Total Cells']
-#
-# # FP versus AS
-# fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
-# sns.scatterplot(data=fp_as_scores_merged[fp_as_scores_merged['Hypothesis_x'] == 1], x="cmc/n fp", y="Score", ax=ax1, color="steelblue", s=10)
-# ax1.set_title("Hypothesis 1")
-# sns.scatterplot(data=fp_as_scores_merged[fp_as_scores_merged['Hypothesis_x'] == 0], x="cmc/n fp", y="Score", ax=ax2, color="coral", s=10)
-# ax2.set_title("Hypothesis 2")
-# plt.tight_layout()
-# plt.savefig(f"{output_folder}/{'fp_as_scores'}", dpi=300)
-# # plt.show()
-
+# Merge LR results for comparison of all two types of traces
 bf_fp_lrs_merged = pd.merge(bf_lrs, fp_lrs, on=['source_ids.0', 'source_ids.1'], how='inner')
 bf_as_lrs_merged = pd.merge(bf_lrs, as_lrs, on=['source_ids.0', 'source_ids.1'], how='inner')
 fp_as_lrs_merged = pd.merge(fp_lrs, as_lrs, on=['source_ids.0', 'source_ids.1'], how='inner')
 
-# BF versus FP
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
-sns.scatterplot(data=bf_fp_lrs_merged[bf_fp_lrs_merged['label_x'] == 1], x="mcmc.0_x", y="mcmc.0_y", ax=ax1, color="steelblue", s=10)
-ax1.set_title("Hypothesis 1")
-sns.scatterplot(data=bf_fp_lrs_merged[bf_fp_lrs_merged['label_x'] == 0], x="mcmc.0_x", y="mcmc.0_y", ax=ax2, color="coral", s=10)
-ax2.set_title("Hypothesis 2")
-plt.tight_layout()
-ax1.set_xlabel("BF LR score")
-ax1.set_ylabel("FP LR score")
-ax2.set_xlabel("BF LR score")
-ax2.set_ylabel("FP LR score")
-plt.savefig(f"{output_folder}/{'bf_fp_lrs_no_bounds'}", dpi=300)
-# plt.show()
+def plot_conditional_lrs(merged_data, name_x, name_y, type_1_name, type_2_name, name_output):
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+    sns.scatterplot(data=merged_data[merged_data['label_x'] == 1], x=name_x, y=name_y, ax=ax1,
+                    color="steelblue", s=10)
+    ax1.set_title("Hypothesis 1")
+    sns.scatterplot(data=merged_data[merged_data['label_x'] == 0], x=name_x, y=name_y, ax=ax2,
+                    color="coral", s=10)
+    ax2.set_title("Hypothesis 2")
+    plt.tight_layout()
+    ax1.set_xlabel(type_1_name + " LR score")
+    ax1.set_ylabel(type_2_name + " LR score")
+    ax2.set_xlabel(type_1_name + " LR score")
+    ax2.set_ylabel(type_2_name + " LR score")
+    plt.savefig(f"{output_folder}/{name_output}", dpi=300)
 
-# # BF versus AS
-# fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
-# sns.scatterplot(data=bf_as_lrs_merged[bf_as_lrs_merged['label_x'] == 1], x="bounder.0", y="bootstrap.1", ax=ax1, color="steelblue", s=10)
-# ax1.set_title("Hypothesis 1")
-# sns.scatterplot(data=bf_as_lrs_merged[bf_as_lrs_merged['label_x'] == 0], x="bounder.0", y="bootstrap.1", ax=ax2, color="coral", s=10)
-# ax2.set_title("Hypothesis 2")
-# plt.tight_layout()
-# ax1.set_xlabel("BF LR score")
-# ax1.set_ylabel("AS LR score")
-# ax2.set_xlabel("BF LR score")
-# ax2.set_ylabel("AS LR score")
-# plt.savefig(f"{output_folder}/{'bf_as_lrs'}", dpi=300)
-# # plt.show()
-#
-# # FP versus AS
-# fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
-# sns.scatterplot(data=fp_as_lrs_merged[fp_as_lrs_merged['label_x'] == 1], x="bounder.0", y="bootstrap.1", ax=ax1, color="steelblue", s=10)
-# ax1.set_title("Hypothesis 1")
-# sns.scatterplot(data=fp_as_lrs_merged[fp_as_lrs_merged['label_x'] == 0], x="bounder.0", y="bootstrap.1", ax=ax2, color="coral", s=10)
-# ax2.set_title("Hypothesis 2")
-# plt.tight_layout()
-# ax1.set_xlabel("FP LR score")
-# ax1.set_ylabel("AS LR score")
-# ax2.set_xlabel("FP LR score")
-# ax2.set_ylabel("AS LR score")
-# plt.savefig(f"{output_folder}/{'fp_as_lrs'}", dpi=300)
-# # plt.show()
+# Plot BF versus FP LRs, under both hypotheses
+plot_conditional_lrs(bf_fp_lrs_merged, "bounder.0_x", "bounder.0_y", "BF", "LR", "bf_fp_lrs")
+# Plot BF versus AS LRs, under both hypotheses
+plot_conditional_lrs(bf_as_lrs_merged, "bounder.0", "bootstrap.1", "BF", "AS", "bf_as_lrs")
+# Plot FP versus AS LRs, under both hypotheses
+plot_conditional_lrs(fp_as_lrs_merged, "bounder.0", "bootstrap.1", "FP", "AS", "fp_as_lrs")
 
 a = 1
